@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Panel de Administración — Mural Interactivo</title>
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <img src="assets/logo.png" alt="Campestre Americano School" onerror="this.style.display='none'">
+    </div>
+    <nav class="top-actions">
+      <a class="btn btn-secondary" href="index.html">← Volver al inicio</a>
+      <button id="btnLogout" class="btn">Cerrar sesión</button>
+    </nav>
+  </header>
+
+  <!-- Vista Login (visible por defecto) -->
+  <main id="loginView" class="view">
+    <section class="card card-login">
+      <h1>Ingreso Administrador</h1>
+      <p class="muted">Usa tu usuario/contraseña de la hoja <em>Admins</em>.</p>
+      <form id="loginForm">
+        <label>Usuario
+          <input type="text" name="user" autocomplete="username" required>
+        </label>
+        <label>Contraseña
+          <input type="password" name="pass" autocomplete="current-password" required>
+        </label>
+        <button class="btn btn-primary" type="submit">Entrar</button>
+      </form>
+      <p id="loginError" class="error hidden" role="alert" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <!-- Vista App -->
+  <main id="appView" class="view hidden">
+    <section class="toolbar">
+      <div class="filters">
+        <button data-filter="pendiente" class="chip chip-active">Pendientes</button>
+        <button data-filter="aprobado"  class="chip">Aprobados</button>
+        <button data-filter="todos"     class="chip">Todos</button>
+      </div>
+      <div class="searchbox">
+        <input id="q" type="search" placeholder="Buscar por nombre, email o texto…">
+      </div>
+    </section>
+
+    <section class="stats" id="stats">
+      <div class="stat"><span id="statPend">0</span><small>Pendientes</small></div>
+      <div class="stat"><span id="statApr">0</span><small>Aprobados</small></div>
+      <div class="stat"><span id="statTot">0</span><small>Total</small></div>
+    </section>
+
+    <section class="table-wrap">
+      <table class="table" id="grid">
+        <thead>
+          <tr>
+            <th scope="col">Fecha</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Email</th>
+            <th scope="col">Comentario</th>
+            <th scope="col">Estado</th>
+            <th scope="col" style="width:180px">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <!-- filas dinámicas -->
+        </tbody>
+      </table>
+      <div id="empty" class="empty hidden">No hay registros para mostrar.</div>
+      <div id="loading" class="loading hidden">Cargando…</div>
+    </section>
+  </main>
+
+  <!-- Config y lógica -->
+  <script src="js/config.js"></script>
+
+  <!-- Airbag anti-pantalla-en-blanco si config falla -->
+  <script>
+    (function () {
+      if (!window.CONFIG || !window.CONFIG.API_URL) {
+        console.warn('config.js no cargó o falta CONFIG.API_URL; mostrando login por defecto.');
+        document.addEventListener('DOMContentLoaded', function () {
+          var lv = document.getElementById('loginView');
+          var av = document.getElementById('appView');
+          if (lv) lv.classList.remove('hidden');
+          if (av) av.classList.add('hidden');
+        });
+      }
+    })();
+  </script>
+
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+
+  <!-- Fallback sin JS -->
+  <noscript>
+    <style>
+      #loginView { display:block !important; }
+      #appView { display:none !important; }
+    </style>
+    <div class="view" style="max-width:600px;margin:2rem auto;color:#fff;">
+      Activa JavaScript para usar el panel de administración.
+    </div>
+  </noscript>
+</body>
+</html>

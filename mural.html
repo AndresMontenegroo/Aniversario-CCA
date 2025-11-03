@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mural Interactivo — 35 Años</title>
+
+  <!-- Tipografías elegantes como la landing -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/mural.css" />
+</head>
+<body>
+  <!-- Marco exterior (madera) -->
+  <div class="frame-bg" aria-hidden="true"></div>
+
+  <main class="board" role="main" aria-label="Mural del 35 aniversario">
+    <!-- Logo arriba izquierda -->
+    <a class="brand" href="index.html" aria-label="Ir a la portada">
+      <img src="assets/logo.png" alt="Campestre Americano School">
+    </a>
+
+    <!-- Botón Volver arriba derecha -->
+    <a class="btn-back" href="index.html" aria-label="Volver a la portada">← Volver <span class="caret">^</span></a>
+
+    <!-- Marca central -->
+    <section class="center-mark" aria-hidden="true">
+      <div class="num">35</div>
+      <div class="years"><span class="line"></span> YEARS <span class="line"></span></div>
+      <div class="slogan">EDUCATING<br>WORLD<br>CITIZENS</div>
+    </section>
+
+    <!-- Capa para notas (vacía por ahora) -->
+    <section id="notes-layer" class="notes-layer" aria-live="polite"></section>
+
+    <!-- Vignette/viñeta de bordes -->
+    <div class="vignette" aria-hidden="true"></div>
+  </main>
+
+  <script src="js/mural.js"></script>
+</body>
+</html>

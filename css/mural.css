@@ -1,0 +1,138 @@
+/* ===== Mural 35 Años (matching del mock) ===== */
+:root{
+  --wood:#7a441a;
+  --wood-dark:#5c320f;
+  --paper:#e0c08f;
+  --paper-2:#d4b27f;
+  --paper-3:#b98f59;
+  --ink:#1a1a1a;
+  --shadow:rgba(0,0,0,.35);
+}
+
+/* Marco exterior (madera) */
+html,body{height:100%; margin:0}
+body{background:var(--wood); font-family: "Cormorant Garamond", serif; color:var(--ink);}
+
+.frame-bg{
+  position:fixed; inset:0;
+  background: linear-gradient(180deg,var(--wood) 0%, var(--wood-dark) 100%);
+  box-shadow: inset 0 0 0 10px #82491d, inset 0 0 0 22px #6b3a14;
+  z-index:0;
+}
+
+/* Tablero principal */
+.board{
+  position:relative; z-index:1;
+  margin:20px; height:calc(100svh - 40px);
+  border-radius:6px;
+  overflow:hidden;
+  background:
+    radial-gradient(1200px 800px at 50% -200px, rgba(255,255,255,.25), transparent 60%),
+    repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,.06) 0 6px, rgba(0,0,0,.02) 6px 12px),
+    linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 60%, var(--paper) 100%);
+  box-shadow:
+    inset 0 -6px 18px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.35),
+    0 10px 40px var(--shadow);
+  border:1px solid rgba(0,0,0,.18);
+}
+
+/* Viñeteado suave en bordes */
+.vignette{
+  position:absolute; inset:0;
+  background: radial-gradient(120% 120% at 50% 50%, transparent 60%, rgba(0,0,0,.20) 100%);
+  pointer-events:none;
+}
+
+/* Logo esquina superior izquierda */
+.brand{
+  position:absolute; top:22px; left:26px; display:inline-flex; align-items:center;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,.25));
+}
+.brand img{ height:56px; width:auto; display:block; }
+
+/* Botón volver arriba derecha */
+.btn-back{
+  position:absolute; top:20px; right:22px;
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 12px; border-radius:10px;
+  font-weight:600; font-size:14px; text-decoration:none; color:#fff;
+  background: rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.25);
+  backdrop-filter: blur(6px);
+}
+.btn-back:hover{ background: rgba(0,0,0,.45); }
+.btn-back .caret{ transform: rotate(180deg); opacity:.8 }
+
+/* Marca central */
+.center-mark{
+  position:absolute; inset:0; display:grid; place-items:center;
+  text-align:center; color:#000;
+}
+.center-mark .num{
+  font-family:"Playfair Display", serif;
+  font-size: clamp(120px, 18vw, 220px);
+  line-height:.8; letter-spacing:.02em;
+  text-shadow: 0 2px 0 rgba(0,0,0,.25);
+}
+.center-mark .years{
+  margin-top:6px; font-size: clamp(18px, 2.4vw, 28px); letter-spacing:.12em;
+  display:flex; align-items:center; justify-content:center; gap:16px;
+}
+.center-mark .years .line{
+  display:inline-block; width:min(120px,16vw); height:1px; background:#2d2d2d; opacity:.6;
+}
+.center-mark .slogan{
+  margin-top:12px; font-size: clamp(22px, 3vw, 34px); line-height:1.08;
+  letter-spacing:.05em; font-weight:600;
+}
+
+/* Capa de notas (aún vacía) */
+.notes-layer{
+  position:absolute; inset:80px 24px 28px 24px; /* deja márgenes para que no se peguen al borde */
+  pointer-events:auto;
+}
+
+/* Estilos preparados para las notas (no se renderizan aún) */
+.note{
+  position:absolute; width:280px; min-height:220px; padding:18px 18px 22px;
+  border-radius:6px; background:#fde68a; color:#1f2937;
+  box-shadow: 0 8px 26px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25);
+  border:1px solid rgba(0,0,0,.12);
+  transform: rotate(calc(var(--rot, 0deg)));
+  transition: transform .2s ease, box-shadow .2s ease;
+  will-change: transform;
+}
+.note:hover{ box-shadow: 0 12px 34px rgba(0,0,0,.45); transform: translateY(-2px) rotate(calc(var(--rot, 0deg))); }
+.note .author{ display:block; margin-top:12px; font-style:italic; opacity:.8 }
+
+/* Chincheta */
+.pin{
+  position:absolute; top:-10px; left:50%; transform:translateX(-50%);
+  width:16px; height:16px; border-radius:50%;
+  background:#e11d48; box-shadow: 0 2px 0 #991b1b, 0 10px 12px rgba(0,0,0,.25);
+}
+
+/* Que el botón y el logo queden por encima de todo */
+.btn-back,
+.brand { z-index: 50; position: absolute; pointer-events: auto; }
+
+/* La capa de notas no bloquea controles, pero las notas sí */
+.notes-layer { z-index: 10; pointer-events: none; }
+.notes-layer .note { pointer-events: auto; }
+
+/* La viñeta jamás debe capturar clics */
+.vignette { z-index: 20; pointer-events: none; }
+
+
+/* Responsivo */
+@media (max-width: 900px){
+  .brand img{ height:48px }
+  .notes-layer{ inset:78px 18px 24px }
+  .note{ width:240px; min-height:190px }
+}
+@media (max-width: 600px){
+  .brand img{ height:42px }
+  .btn-back{ font-size:13px }
+  .note{ width:210px; min-height:170px }
+}

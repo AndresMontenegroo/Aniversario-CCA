@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mural Interactivo - 35 Años</title>
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    
+    <header class="navbar">
+  <a class="logo" href="#" aria-label="Inicio">
+    <img src="assets/logo.png" alt="Campestre Americano School">
+  </a>
+  <a class="btn-mural" href="mural.html">Ver mural <span class="dropdown-icon" aria-hidden="true">▼</span></a>
+</header>
+
+
+
+    <main class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-number">35</h1>
+            <h2 class="hero-title">Años</h2>
+            <h3 class="hero-subtitle">Construyendo</h3>
+            <h3 class="hero-emphasis">SUEÑOS</h3>
+            <p class="hero-tagline">Historias & Futuro</p>
+        </div>
+        
+        <button class="scroll-indicator" onclick="scrollToContent()">
+            <span class="arrow-down">↓</span>
+        </button>
+    </main>
+
+    <section id="content-section" class="memorable-moments">
+        <div class="moments-container">
+            <h2 class="moments-title">Momentos Memorables</h2>
+            <p class="moments-subtitle">35 años de historia, aprendizaje y comunidad</p>
+            
+            <div class="carousel-wrapper">
+            <div class="carousel-container"
+                    id="carousel"
+                    role="region"
+                    aria-roledescription="carousel"
+                    aria-label="Momentos memorables"
+                    tabindex="0">
+                    <div class="carousel-slide active">
+                        <img src="assets/moment1.jpg" alt="Momento memorable" onerror="this.src='https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=1200&h=700&fit=crop'">
+                        <div class="carousel-overlay">
+                            <h3 class="carousel-text-main">Una comunidad que aprende</h3>
+                            <p class="carousel-text-sub">Celebramos cada logro, cada amistad y cada nuevo comienzo.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="carousel-slide">
+                        <img src="assets/moment2.jpg" alt="Momento memorable" onerror="this.src='https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=700&fit=crop'">
+                        <div class="carousel-overlay">
+                            <h3 class="carousel-text-main">Construyendo sueños juntos</h3>
+                            <p class="carousel-text-sub">Cada día es una nueva oportunidad para crecer y aprender.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="carousel-slide">
+                        <img src="assets/moment3.jpg" alt="Momento memorable" onerror="this.src='https://images.unsplash.com/photo-1509062522246-3755977927d7?w=1200&h=700&fit=crop'">
+                        <div class="carousel-overlay">
+                            <h3 class="carousel-text-main">35 años de excelencia</h3>
+                            <p class="carousel-text-sub">Formando líderes que transforman el mundo.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="carousel-slide">
+                        <img src="assets/moment4.jpg" alt="Momento memorable" onerror="this.src='https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=1200&h=700&fit=crop'">
+                        <div class="carousel-overlay">
+                            <h3 class="carousel-text-main">Historias que inspiran</h3>
+                            <p class="carousel-text-sub">Cada estudiante escribe su propia historia de éxito.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="carousel-slide">
+                        <img src="assets/moment5.jpg" alt="Momento memorable" onerror="this.src='https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&h=700&fit=crop'">
+                        <div class="carousel-overlay">
+                            <h3 class="carousel-text-main">Juntos hacia el futuro</h3>
+                            <p class="carousel-text-sub">Continuamos construyendo un legado de excelencia educativa.</p>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <!-- Controles del carrusel -->
+                <button class="carousel-btn prev" onclick="moveCarousel(-1)">‹</button>
+                <button class="carousel-btn next" onclick="moveCarousel(1)">›</button>
+                
+                <!-- Indicadores -->
+                 <div class="carousel-indicators" role="tablist" aria-label="Seleccionar diapositiva">
+                <!-- Dots se inyectan por JS -->
+                 </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="section-title">Comparte tu Historia</h2>
+            <p class="section-description">
+                Forma parte de nuestra celebración dejando tu mensaje en nuestro mural interactivo.
+                Cada comentario cuenta una historia única que construye nuestro legado.
+            </p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">💭</div>
+                    <h3>Comparte</h3>
+                    <p>Deja tu mensaje y recuerdos especiales</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Explora</h3>
+                    <p>Descubre las historias de nuestra comunidad</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">✨</div>
+                    <h3>Celebra</h3>
+                    <p>Sé parte de este momento histórico</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <a href="admin.html" class="admin-link">Acceso Administrador</a>
+        <p class="footer-text">© 2025 Mural Interactivo. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="js/landing.js"></script>
+</body>
+</html>
