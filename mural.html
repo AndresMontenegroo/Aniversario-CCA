@@ -29,13 +29,15 @@
       <div class="slogan">EDUCATING<br>WORLD<br>CITIZENS</div>
     </section>
 
-    <!-- Capa para notas (vacía por ahora) -->
+    <!-- Capa para notas (aquí se pintan las aprobadas) -->
     <section id="notes-layer" class="notes-layer" aria-live="polite"></section>
 
     <!-- Vignette/viñeta de bordes -->
     <div class="vignette" aria-hidden="true"></div>
   </main>
-  <script src="js/config.js"></script>
-  <script src="js/mural.js"></script>
+
+  <!-- Cargar config primero; luego lógica del mural -->
+  <script defer src="js/config.js"></script>
+  <script defer src="js/mural.js"></script>
 </body>
 </html>

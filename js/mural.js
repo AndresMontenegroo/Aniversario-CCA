@@ -48,6 +48,50 @@
     noteEl.style.transform = `rotate(${rot}deg)`;
   }
 
+  // ===== JSON / JSONP helper (con fallback de CORS) =====
+  async function safeJSON(url) {
+    // 1) Intento normal con fetch
+    try {
+      const r = await fetch(url, { method: 'GET', cache: 'no-store' });
+      // Si el servidor no da CORS, fetch puede “suceder” pero no deja leer body
+      // En ese caso, intentar leer igual; si falla, caemos a JSONP.
+      const txt = await r.text();
+      try { return JSON.parse(txt); } catch (_) { /* sigue */ }
+    } catch (_) { /* sigue */ }
+
+    // 2) Fallback JSONP (Apps Script lo soporta si le pasas ?callback=)
+    return jsonp(url);
+  }
+
+  function jsonp(url) {
+    return new Promise((resolve) => {
+      const cb = `__mural_cb_${Date.now()}_${Math.floor(Math.random()*1e6)}`;
+      const sep = url.includes('?') ? '&' : '?';
+      const src = `${url}${sep}callback=${cb}`;
+
+      window[cb] = (data) => {
+        cleanup();
+        resolve(data);
+      };
+
+      const s = document.createElement('script');
+      s.src = src;
+      s.async = true;
+      s.defer = true;
+      s.onerror = () => { cleanup(); resolve(null); };
+      document.head.appendChild(s);
+
+      // timeout de cortesía
+      const to = setTimeout(() => { cleanup(); resolve(null); }, 12000);
+
+      function cleanup() {
+        try { delete window[cb]; } catch {}
+        try { document.head.removeChild(s); } catch {}
+        clearTimeout(to);
+      }
+    });
+  }
+
   // --- API: trae aprobados ---
   async function fetchApproved() {
     // 1) Intento con ?p=comments&estado=aprobado
@@ -60,11 +104,6 @@
 
     const items = normalizeItems(res);
     return items.filter(x => norm(x.estado) === 'aprobado');
-  }
-
-  async function safeJSON(url) {
-    try { const r = await fetch(url, { method: 'GET' }); return await r.json(); }
-    catch { return null; }
   }
 
   function isValidList(r) {

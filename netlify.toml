@@ -1,21 +1,18 @@
-# Configuración de Netlify
-
 [build]
   publish = "."
-  
+
+# Proxy del front a tu Apps Script (preserva la query ?p=...)
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/api"
+  to = "https://script.google.com/macros/s/AKfycbyfM0eSX32eqkfGgYpF66sc7I2NhHdP8qUw_ArRGsjZ9FpcZKIyhH3ReSOQKKRmGSUcpw/exec"
   status = 200
+  force = true
 
-[build.environment]
-  NODE_VERSION = "18"
-
-# Headers de seguridad
+# (Opcional) Cache básico para archivos estáticos
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "no-referrer"
-    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+
+   
