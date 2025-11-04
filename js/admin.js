@@ -1,4 +1,4 @@
-/* ===== Panel Admin (autónomo): login, listado, moderación ===== */
+/* ===== Panel Admin (autónomo): login, listado, moderación — con rompe-caché + JSONP + fallback row ===== */
 (function () {
   // --- Config ---
   const API = window.CONFIG?.API_URL || '';
@@ -17,39 +17,49 @@
   }
 
   // --- Utils ---
-  const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const esc  = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   const norm = s => String(s || '').toLowerCase();
 
-  // JSON/JSONP con fallback (para evitar CORS cuando no usas proxy)
-  async function getJSON(url) {
-    try {
-      const r = await fetch(url, { cache: 'no-store' });
-      const t = await r.text();
-      try { return JSON.parse(t); } catch (_) {}
-    } catch (_) {}
-    return jsonp(url);
+  // Rompe-caché
+  function bust(url) {
+    const sep = url.includes('?') ? '&' : '?';
+    return `${url}${sep}_=${Date.now()}`;
   }
-  function jsonp(url) {
-    return new Promise(resolve => {
-      const cb = `__admin_cb_${Date.now()}_${Math.floor(Math.random()*1e6)}`;
-      const sep = url.includes('?') ? '&' : '?';
-      const src = `${url}${sep}callback=${cb}`;
-      const s = document.createElement('script');
-      const to = setTimeout(cleanup, 12000, null);
 
-      window[cb] = data => { cleanup(data); };
+  // JSON/JSONP con fallback (evita CORS y caches tercos)
+  async function getJSON(url) {
+    const busted = bust(url);
+    try {
+      const r = await fetch(busted, { method: 'GET', cache: 'no-store' });
+      const t = await r.text();
+      try { return JSON.parse(t); } catch (_) { /* sigue a JSONP */ }
+    } catch (_) { /* sigue a JSONP */ }
+    return jsonp(busted);
+  }
+
+  function jsonp(urlWithBust) {
+    return new Promise(resolve => {
+      const cb  = `__admin_cb_${Date.now()}_${Math.floor(Math.random()*1e6)}`;
+      const sep = urlWithBust.includes('?') ? '&' : '?';
+      const src = `${urlWithBust}${sep}callback=${cb}`;
+      const s   = document.createElement('script');
+
+      window[cb] = (data) => { cleanup(); resolve(data); };
+
       s.src = src; s.async = true; s.defer = true;
-      s.onerror = () => cleanup(null);
+      s.onerror = () => { cleanup(); resolve(null); };
       document.head.appendChild(s);
 
-      function cleanup(data) {
-        clearTimeout(to);
+      const to = setTimeout(() => { cleanup(); resolve(null); }, 12000);
+
+      function cleanup() {
         try { delete window[cb]; } catch {}
         try { document.head.removeChild(s); } catch {}
-        resolve(data);
+        clearTimeout(to);
       }
     });
   }
+
   const qparam = obj =>
     Object.entries(obj)
       .filter(([,v]) => v !== undefined && v !== null && v !== '')
@@ -99,7 +109,7 @@
     const url = `${API}?${qparam({ p: EP.login, user, pass })}`;
     const j = await getJSON(url);
     if (j?.ok && j.success) {
-      Session.save(j.token || 'ok'); // token simple del backend (o 'ok' si no viene)
+      Session.save(j.token || 'ok'); // token opcional
       setView('app');
       return true;
     }
@@ -112,12 +122,13 @@
 
   // --- Normaliza item del backend a un formato único ---
   const normalizeItem = it => ({
-    id:     it.id || it.ID || '',
-    ts:     it.timestamp || it.ts || '',
+    id:     it.id || it.ID || it.Id || '',
+    ts:     it.timestamp || it.ts || it.fecha || '',
     name:   it.nombre || it.name || 'Anónimo',
     mail:   it.email || it.mail || '',
     text:   it.comentario || it.text || '',
-    estado: (it.estado || it.status || 'pendiente').toLowerCase()
+    estado: (it.estado || it.status || 'pendiente').toLowerCase(),
+    row:    it.rowIndex || it.row || null   // <-- usamos esto para moderar por fila
   });
 
   // --- Carga de comentarios (con filtro y búsqueda local) ---
@@ -126,18 +137,18 @@
     try {
       // 1) Intento principal
       let url = `${API}?${qparam({ p: EP.comments, estado: filter === 'todos' ? '' : filter })}`;
-      let j = await getJSON(url);
+      let j   = await getJSON(url);
 
       // 2) Fallback
-      if (!j || j.ok === false || !Array.isArray(j.items)) {
+      if (!j || j.ok === false || !Array.isArray(j.items || j.data)) {
         url = `${API}?${qparam({ p: EP.peek, estado: filter === 'todos' ? '' : filter, limit: 500 })}`;
-        j = await getJSON(url);
+        j   = await getJSON(url);
       }
 
-      const raw = (j?.items || []).map(normalizeItem);
+      const raw = ((j?.items || j?.data) || []).map(normalizeItem);
 
-      // Aplicar búsqueda local
-      const qn = norm(query);
+      // Búsqueda local
+      const qn = norm(query.trim());
       const items = qn
         ? raw.filter(x =>
             norm(x.name).includes(qn) ||
@@ -174,20 +185,44 @@
         <td>${badge(it.estado)}</td>
         <td>
           <div class="row-actions">
-            <button class="btn btn-approve" data-id="${esc(it.id)}">Aprobar</button>
-            <button class="btn btn-reject"  data-id="${esc(it.id)}">Rechazar</button>
+            <button class="btn btn-approve" data-id="${esc(it.id)}" data-row="${it.row ?? ''}">Aprobar</button>
+            <button class="btn btn-reject"  data-id="${esc(it.id)}" data-row="${it.row ?? ''}">Rechazar</button>
           </div>
         </td>
       `;
       rowsEl.appendChild(tr);
     }
 
-    // Bind acciones
+    // Bind acciones (ahora pasan también la fila)
     rowsEl.querySelectorAll('.btn-approve').forEach(b =>
-      b.addEventListener('click', () => moderate(b.getAttribute('data-id'), 'aprobado'))
+      b.addEventListener('click', async () => {
+        const id  = b.getAttribute('data-id') || '';
+        const row = Number(b.getAttribute('data-row')) || null;
+        b.disabled = true;
+        try {
+          await moderate(id, 'aprobado', row);
+          await loadComments(current.filter, current.q);
+        } catch (e) {
+          alert(e?.message || 'No se pudo actualizar el estado');
+        } finally {
+          b.disabled = false;
+        }
+      })
     );
     rowsEl.querySelectorAll('.btn-reject').forEach(b =>
-      b.addEventListener('click', () => moderate(b.getAttribute('data-id'), 'rechazado'))
+      b.addEventListener('click', async () => {
+        const id  = b.getAttribute('data-id') || '';
+        const row = Number(b.getAttribute('data-row')) || null;
+        b.disabled = true;
+        try {
+          await moderate(id, 'rechazado', row);
+          await loadComments(current.filter, current.q);
+        } catch (e) {
+          alert(e?.message || 'No se pudo actualizar el estado');
+        } finally {
+          b.disabled = false;
+        }
+      })
     );
   }
 
@@ -199,17 +234,27 @@
     return `<span class="badge">${esc(s)}</span>`;
   }
 
-  // --- Moderación (GET para evitar preflight; con JSONP fallback) ---
-  async function moderate(id, estado) {
-    if (!id) return;
-    const url = `${API}?${qparam({ p: EP.update, id, status: estado })}`;
-    const j = await getJSON(url);
-    if (!j?.ok || j.success === false) {
-      alert(j?.message || 'El backend no aceptó la operación');
-      return;
-    }
-    // Recargar manteniendo filtro/búsqueda actuales
-    await loadComments(current.filter, current.q);
+  // --- Moderación (GET para evitar preflight; manda id y row; con fallback a 'estado') ---
+  async function moderate(id, estado, row) {
+    if (!id && !row) throw new Error('Falta identificador (id/row)');
+
+    // Intento #1: status=...
+    let params = { p: EP.update, status: estado };
+    if (id)  params.id  = id;
+    if (row) params.row = row;
+
+    let j = await getJSON(`${API}?${qparam(params)}`);
+    if (j?.ok) return j;
+
+    // Intento #2: estado=... (por si el backend espera ese nombre)
+    params = { p: EP.update, estado };
+    if (id)  params.id  = id;
+    if (row) params.row = row;
+
+    j = await getJSON(`${API}?${qparam(params)}`);
+    if (j?.ok) return j;
+
+    throw new Error(j?.message || 'El backend no aceptó la operación');
   }
 
   // ----- UI wiring -----
@@ -239,7 +284,7 @@
   loginForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     loginErr?.classList.add('hidden');
-    const fd = new FormData(loginForm);
+    const fd   = new FormData(loginForm);
     const user = fd.get('user')?.toString().trim();
     const pass = fd.get('pass')?.toString();
     try {

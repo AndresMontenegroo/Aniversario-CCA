@@ -1,17 +1,38 @@
 // js/config.js
-window.CONFIG = {
-  // Pega tu /exec de Apps Script o '/api' si usas proxy Netlify
-  API_URL: 'https://script.google.com/macros/s/AKfycbzOarY2hO-rYdDD_y9L4Bh8zu5qfIr39KfuUeBMg3hH_b3tciDSp-XluiW8IB-MJfdX4w/exec',
 
+// Detecta si estás corriendo en Netlify (producción)
+const IS_NETLIFY = /\.netlify\.app$/i.test(location.host);
+
+// Si quieres forzarlo manualmente en algún momento:
+// const IS_NETLIFY = true;  // <-- fuerza /api (proxy)
+// const IS_NETLIFY = false; // <-- fuerza URL directa de Apps Script
+
+// ¡Pon aquí tu URL real de Apps Script (exec)!
+const APPS_SCRIPT_EXEC = 'https://script.google.com/macros/s/AKfycbyM-43GmY3A9NZFx0OlGYNQLaNgRA90pMTqgRbN13IIapEmfIVn2t2r1whR3yGOZUPuRQ/exec';
+
+const CONFIG = {
+  // En Netlify usamos el proxy /api (definido en netlify.toml).
+  // En local/otro host usamos la URL directa del exec.
+  API_URL: IS_NETLIFY ? '/api' : APPS_SCRIPT_EXEC,
+
+  AUTO_REFRESH_INTERVAL: 60000,
+  REFRESH_MS: 120000,         // por compatibilidad con tu código
+  APP_NAME: 'Mural Interactivo',
   STORAGE_KEY: 'mural_token',
-  REFRESH_MS: 30000,
 
+  // Endpoints estándar del backend
   EP: {
-    login:     'login',     // GET ?p=login&user=&pass=
-    me:        'me',        // GET ?p=me&token=
-    listA:     'comments',  // GET ?p=comments&estado=&token=
-    listB:     'peek',      // GET ?p=peek&estado=&limit=&token=
-    moderateA: 'moderate',  // POST {p:'moderate', id, estado, token}
-    moderateB: 'setEstado', // POST {p:'setEstado', id, estado, token}
+    comments: 'comments',
+    peek: 'peek',
+    update: 'updateStatus',
+    login: 'login'
   }
 };
+
+// Asegura que esté disponible globalmente
+window.CONFIG = CONFIG;
+
+// Export opcional por si alguna herramienta lo requiere
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = CONFIG;
+}

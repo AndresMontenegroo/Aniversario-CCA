@@ -1,18 +1,30 @@
-/* ===== Mural 35 Años (matching del mock) ===== */
+/* ===== Mural 35 Años — v7.2 (drag + zoom sin X + memoria + pin real + colores + corcho) ===== */
 :root{
   --wood:#7a441a;
   --wood-dark:#5c320f;
-  --paper:#e0c08f;
-  --paper-2:#d4b27f;
-  --paper-3:#b98f59;
   --ink:#1a1a1a;
   --shadow:rgba(0,0,0,.35);
+
+  --note-lines: 5;         /* líneas visibles en nota normal */
+  --note-fs: 14px;         /* tamaño base del texto en nota */
+  --note-author-fs:12px;   /* tamaño base del autor */
+  --zoom-scale: 2.35;      /* factor de zoom tipográfico */
+
+  /* Ruta del pin (ajústala si cambias la carpeta) */
+  --pin-url: url("/assets/pin.png");
 }
 
-/* Marco exterior (madera) */
 html,body{height:100%; margin:0}
-body{background:var(--wood); font-family: "Cormorant Garamond", serif; color:var(--ink);}
+body{
+  background:var(--wood);
+  font-family:"Cormorant Garamond", serif;
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+body.no-scroll{ overflow:hidden; }
 
+/* Marco exterior (madera) */
 .frame-bg{
   position:fixed; inset:0;
   background: linear-gradient(180deg,var(--wood) 0%, var(--wood-dark) 100%);
@@ -20,38 +32,62 @@ body{background:var(--wood); font-family: "Cormorant Garamond", serif; color:var
   z-index:0;
 }
 
-/* Tablero principal */
+/* ===== Tablero con textura de corcho (100% CSS, sin imágenes) ===== */
 .board{
-  position:relative; z-index:1;
-  margin:20px; height:calc(100svh - 40px);
-  border-radius:6px;
-  overflow:hidden;
+  position:relative;
+  isolation:isolate;     /* stacking context controlado */
+  contain: paint;        /* evita repaints fuera del tablero */
+  z-index:1;
+  margin:20px;
+
+  /* Fallback + moderno para altura en móviles */
+  height:calc(100vh - 40px);
+  height:calc(100svh - 40px);
+
+  border-radius:6px; overflow:hidden;
+
+  /* Capas: poros finos + poros medianos desplazados + fibras + base */
   background:
-    radial-gradient(1200px 800px at 50% -200px, rgba(255,255,255,.25), transparent 60%),
-    repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,.06) 0 6px, rgba(0,0,0,.02) 6px 12px),
-    linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 60%, var(--paper) 100%);
+    radial-gradient(circle, rgba(0,0,0,.055) 1px, transparent 1.6px) 0 0 / 10px 10px,
+    radial-gradient(circle, rgba(0,0,0,.040) 1px, transparent 2px) 6px 5px / 12px 12px,
+    repeating-linear-gradient(25deg, rgba(95,61,23,.06) 0 2px, transparent 2px 7px),
+    linear-gradient(180deg, #d9b17a 0%, #c2945e 60%, #d3a469 100%);
+
   box-shadow:
     inset 0 -6px 18px rgba(0,0,0,.25),
-    inset 0 1px 0 rgba(255,255,255,.35),
+    inset 0 1px 0 rgba(255,255,255,.28),
     0 10px 40px var(--shadow);
   border:1px solid rgba(0,0,0,.18);
 }
+/* Velo de grano/ruido sutil por encima del fondo (debajo de notas) */
+.board::before{
+  content:"";
+  position:absolute; inset:0;
+  pointer-events:none;
+  z-index:2;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(0,0,0,.05) 0 1px, transparent 1.2px) 0 0 / 22px 22px,
+    radial-gradient(circle at 70% 60%, rgba(0,0,0,.05) 0 1px, transparent 1.2px) 0 0 / 26px 26px,
+    radial-gradient(circle at 40% 80%, rgba(0,0,0,.05) 0 1px, transparent 1.2px) 0 0 / 30px 30px;
+  opacity:.35;
+}
 
-/* Viñeteado suave en bordes */
+/* Viñeteado (debajo de notas para no taparlas) */
 .vignette{
   position:absolute; inset:0;
   background: radial-gradient(120% 120% at 50% 50%, transparent 60%, rgba(0,0,0,.20) 100%);
   pointer-events:none;
+  z-index:15; /* < notas */
 }
 
-/* Logo esquina superior izquierda */
+/* Logo y botón volver (arriba de todo) */
 .brand{
   position:absolute; top:22px; left:26px; display:inline-flex; align-items:center;
   filter: drop-shadow(0 2px 6px rgba(0,0,0,.25));
+  z-index:50; pointer-events:auto;
 }
 .brand img{ height:56px; width:auto; display:block; }
 
-/* Botón volver arriba derecha */
 .btn-back{
   position:absolute; top:20px; right:22px;
   display:inline-flex; align-items:center; gap:8px;
@@ -60,14 +96,15 @@ body{background:var(--wood); font-family: "Cormorant Garamond", serif; color:var
   background: rgba(0,0,0,.35);
   border:1px solid rgba(255,255,255,.25);
   backdrop-filter: blur(6px);
+  z-index:50; pointer-events:auto;
 }
 .btn-back:hover{ background: rgba(0,0,0,.45); }
 .btn-back .caret{ transform: rotate(180deg); opacity:.8 }
 
-/* Marca central */
+/* Marca central (debajo de notas) */
 .center-mark{
   position:absolute; inset:0; display:grid; place-items:center;
-  text-align:center; color:#000;
+  text-align:center; color:#000; z-index:5;
 }
 .center-mark .num{
   font-family:"Playfair Display", serif;
@@ -87,52 +124,160 @@ body{background:var(--wood); font-family: "Cormorant Garamond", serif; color:var
   letter-spacing:.05em; font-weight:600;
 }
 
-/* Capa de notas (aún vacía) */
+/* Estado de carga / vacío (opcionales) */
+.mural-loading,
+.mural-empty{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  background:rgba(255,255,255,.75); color:#111;
+  padding:10px 14px; border-radius:8px; font-weight:600;
+  box-shadow:0 6px 20px rgba(0,0,0,.15); z-index:45;
+}
+
+/* Capa de notas (sobre todo menos controles) */
 .notes-layer{
-  position:absolute; inset:80px 24px 28px 24px; /* deja márgenes para que no se peguen al borde */
-  pointer-events:auto;
+  position:absolute; inset:80px 24px 28px 24px;
+  min-height:200px;
+  pointer-events:none;          /* la capa no intercepta, las notas sí */
+  z-index:40;                   /* > vignette (15) y > center-mark (5) */
+  touch-action: pan-x pan-y;    /* gestos táctiles sin bloquear scroll del contenedor */
 }
 
-/* Estilos preparados para las notas (no se renderizan aún) */
+/* ===== Notas cuadradas compactas e interactivas ===== */
 .note{
-  position:absolute; width:280px; min-height:220px; padding:18px 18px 22px;
-  border-radius:6px; background:#fde68a; color:#1f2937;
-  box-shadow: 0 8px 26px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.25);
-  border:1px solid rgba(0,0,0,.12);
-  transform: rotate(calc(var(--rot, 0deg)));
-  transition: transform .2s ease, box-shadow .2s ease;
-  will-change: transform;
-}
-.note:hover{ box-shadow: 0 12px 34px rgba(0,0,0,.45); transform: translateY(-2px) rotate(calc(var(--rot, 0deg))); }
-.note .author{ display:block; margin-top:12px; font-style:italic; opacity:.8 }
+  /* Paleta por defecto (se sobreescribe por clase de color) */
+  --note-bg: #fff28a;
+  --note-border: #e4c95d;
+  --pin: #ef4444;
 
-/* Chincheta */
+  position:absolute;
+  width:clamp(120px, 17vw, 180px);
+  aspect-ratio:1 / 1;
+  padding:12px 12px;
+  border-radius:12px;
+  color:#2b2b2b;
+  background:
+    repeating-linear-gradient(transparent 0 10px, rgba(0,0,0,.03) 10px 11px),
+    radial-gradient(140% 140% at 18% 12%, rgba(255,255,255,.45), transparent 42%),
+    var(--note-bg);
+  border:1px solid var(--note-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.65),
+    inset 0 -1px 0 rgba(0,0,0,.05),
+    0 8px 20px rgba(0,0,0,.18);
+  transform:rotate(var(--rot,0deg));
+  will-change:transform, box-shadow, left, top;
+  transition:transform .18s ease, box-shadow .18s ease;
+  pointer-events:auto; overflow:visible; touch-action:none; user-select:none; cursor: grab;
+  z-index:30;
+}
+.note:active{ cursor: grabbing; }
+.note:focus-visible{ outline:2px solid #0ea5e9; outline-offset:2px; }
+.note:hover{ box-shadow:0 12px 34px rgba(0,0,0,.45); transform:translateY(-2px) rotate(calc(var(--rot, 0deg))); }
+.note--dragging{ box-shadow:0 16px 40px rgba(0,0,0,.4); }
+.note--top{ z-index:55; }   /* la que tocas se superpone */
+
+/* Contenido y clamps */
+.note__content{
+  position:relative; display:flex; flex-direction:column; gap:8px;
+  height:100%; overflow:auto; padding-top:6px;
+}
+.note__content p{
+  margin:0; line-height:1.22; overflow-wrap:anywhere;
+  display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis;
+  line-clamp:var(--note-lines);           /* estándar (cuando esté soportado) */
+  -webkit-line-clamp:var(--note-lines);   /* compatibilidad */
+  font-size: var(--note-fs);
+}
+@supports (line-clamp: 3){ .note__content p{ display:block; } }
+.note--zoomed .note__content p{
+  display:block; overflow:visible; text-overflow:clip; line-clamp:unset; -webkit-line-clamp:unset;
+}
+.note__content .author{
+  margin-top:auto; font-style:italic; opacity:.8; font-size: var(--note-author-fs);
+}
+
+/* Deja sobresalir la chincheta fuera de la nota */
+.note{ overflow: visible; }
+
+/* ===== Pin real por IMAGEN (roja) — controlado desde :root ===== */
 .pin{
-  position:absolute; top:-10px; left:50%; transform:translateX(-50%);
-  width:16px; height:16px; border-radius:50%;
-  background:#e11d48; box-shadow: 0 2px 0 #991b1b, 0 10px 12px rgba(0,0,0,.25);
+  position:absolute;
+  left:50%; top:-16px; transform:translateX(-50%);
+  width:46px; height:46px;                 /* tamaño base */
+  pointer-events:none; z-index:3;
+  background: center top / contain no-repeat;
+
+  /* Fallback: usar solo la variable */
+  background-image: var(--pin-url);
+
+  /* Si el navegador soporta image-set, usa la misma como 1x/2x */
+  /* (si no soporta, ignora esta línea y usa la anterior) */
+  background-image: image-set( var(--pin-url) 1x, var(--pin-url) 2x );
+
+  /* sombrita para volumen */
+  filter: drop-shadow(0 8px 10px rgba(0,0,0,.28));
 }
 
-/* Que el botón y el logo queden por encima de todo */
-.btn-back,
-.brand { z-index: 50; position: absolute; pointer-events: auto; }
+/* En el zoom, una única regla (evita conflictos) */
+.zoom-card .pin{
+  top:-6px;
+  width:72px; height:72px;
+}
 
-/* La capa de notas no bloquea controles, pero las notas sí */
-.notes-layer { z-index: 10; pointer-events: none; }
-.notes-layer .note { pointer-events: auto; }
+/* Ajustes móviles */
+@media (max-width:600px){
+  .pin{ width:36px; height:36px; top:-14px; }
+  .zoom-card .pin{ width:64px; height:64px; top:6px; }
+}
 
-/* La viñeta jamás debe capturar clics */
-.vignette { z-index: 20; pointer-events: none; }
+/* ===== Overlay de zoom (sin X, centrado; cerrar tocando fuera) ===== */
+.zoom-backdrop{
+  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+  padding:16px; background:rgba(0,0,0,.55); z-index:1000;
+}
+.zoom-backdrop.active{ display:flex; }
 
+.zoom-card{
+  position:relative;
+  width:min(90vw, 500px); max-height:90vh; aspect-ratio:1 / 1;
+  border-radius:16px; padding:20px; overflow:auto; transform-origin:center center;
+  background:
+    repeating-linear-gradient(transparent 0 12px, rgba(0,0,0,.03) 12px 13px),
+    radial-gradient(140% 140% at 20% 12%, rgba(255,255,255,.5), transparent 45%),
+    var(--note-bg);
+  border:1px solid var(--note-border);
+  box-shadow:0 24px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.65);
+  animation:zoomIn .15s ease forwards;
+  line-height: 1.4;
+}
+.zoom-card p{ line-height:1.35; font-size: calc(var(--note-fs) * var(--zoom-scale)); }
+.zoom-card .author{
+  display:block; margin-top:12px; font-style:italic;
+  font-size: calc(var(--note-author-fs) * var(--zoom-scale)); opacity:.9;
+}
+
+@keyframes zoomIn { from{ transform:scale(.96)} to{ transform:scale(1)} }
+
+/* Menos animación si el usuario lo pide */
+@media (prefers-reduced-motion: reduce){ .note{ transition:none } }
 
 /* Responsivo */
 @media (max-width: 900px){
   .brand img{ height:48px }
   .notes-layer{ inset:78px 18px 24px }
-  .note{ width:240px; min-height:190px }
+  .note{ width:clamp(110px, 32vw, 160px); }
 }
 @media (max-width: 600px){
   .brand img{ height:42px }
   .btn-back{ font-size:13px }
-  .note{ width:210px; min-height:170px }
+  .note{ width:clamp(100px, 78vw, 150px); }
+  .zoom-card{ width:92vw; }
 }
+
+/* ===== Variantes de color de nota (vivas) ===== */
+.note--c0{ --note-bg:#fff28a; --note-border:#e4c95d; --pin:#ef4444; }
+.note--c1{ --note-bg:#a7e3ff; --note-border:#6ec9f0; --pin:#2563eb; }
+.note--c2{ --note-bg:#b7f4cf; --note-border:#6ee7a8; --pin:#10b981; }
+.note--c3{ --note-bg:#ffd1b3; --note-border:#ff9f7a; --pin:#f97316; }
+.note--c4{ --note-bg:#e3d0ff; --note-border:#c4a3ff; --pin:#8b5cf6; }
+.note--c5{ --note-bg:#ffc7df; --note-border:#ff91c0; --pin:#ec4899; }
