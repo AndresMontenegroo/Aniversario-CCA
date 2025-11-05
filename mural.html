@@ -3,47 +3,76 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title>Mural Interactivo — 35 Años</title>
+  <meta name="description" content="Mural interactivo del 35° aniversario — comentarios aprobados en vivo." />
+  <meta name="theme-color" content="#7a441a" />
+  <meta name="color-scheme" content="light dark" />
 
-  <!-- Tipografías (optimizado) -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <!-- Open Graph básico -->
+  <meta property="og:title" content="Mural Interactivo — 35 Años" />
+  <meta property="og:description" content="Notas aprobadas en tiempo real sobre el 35° aniversario del colegio." />
+  <meta property="og:type" content="website" />
 
-  <!-- Estilos del mural (incluye los parches que te pasé) -->
+  <!-- Tipografías -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Playfair+Display:wght@700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Favicon -->
+  <link rel="icon" href="assets/favicon.ico" />
+
+  <!-- Preload del pin -->
+  <link rel="preload" as="image" href="assets/pin.png" />
+
+  <!-- Estilos del mural -->
   <link rel="stylesheet" href="css/mural.css" />
+
+  <!-- Refuerzo tipográfico para UI -->
+  <style>
+    .btn-back, .years, .mural-loading, .mural-empty {
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    }
+  </style>
 </head>
 <body>
-  <!-- Marco exterior (madera) -->
-  <div class="frame-bg" aria-hidden="true"></div>
+  <!-- Tablero fijo con marco de madera y corcho -->
+  <main class="board board--framed" role="main" aria-label="Mural del 35 aniversario">
+    <!-- Gancho superior (se dibuja con CSS) -->
+    <div class="board__hanger" aria-hidden="true"></div>
 
-  <main class="board" role="main" aria-label="Mural del 35 aniversario">
     <!-- Logo arriba izquierda -->
-    <a class="brand" href="index.html" aria-label="Ir a la portada">
-      <img src="assets/logo.png" alt="Campestre Americano School" />
+    <a class="brand" href="index.html" aria-label="Ir a la portada" title="Volver a la portada">
+      <img src="assets/logo2.png" alt="Campestre Americano School" height="56" loading="eager" decoding="async" draggable="false" />
     </a>
 
     <!-- Botón Volver arriba derecha -->
-    <a class="btn-back" href="index.html" aria-label="Volver a la portada">← Volver <span class="caret">^</span></a>
+    <a class="btn-back" href="index.html" aria-label="Volver a la portada" title="Volver a la portada">
+      ← Volver <span class="caret" aria-hidden="true">^</span>
+    </a>
 
-    <!-- Marca central (queda debajo de las notas con el CSS parcheado) -->
-    <section class="center-mark" aria-hidden="true">
-      <div class="num">35</div>
-      <div class="years"><span class="line"></span> YEARS <span class="line"></span></div>
-      <div class="slogan">EDUCATING<br>WORLD<br>CITIZENS</div>
-    </section>
+    <!-- Área de corcho (fija dentro del marco) -->
+    <div class="board__cork">
+      <!-- Marca central (debajo de notas) -->
+      <section class="center-mark" aria-hidden="true">
+        <div class="num">35</div>
+        <div class="years"><span class="line"></span> YEARS <span class="line"></span></div>
+        <div class="slogan">EDUCATING<br>WORLD<br>CITIZENS</div>
+      </section>
 
-    <!-- Estado de carga / vacío (opcionales para depurar) -->
-    <div id="mural-loading" class="mural-loading" hidden>Cargando notas…</div>
-    <div id="mural-empty" class="mural-empty" hidden>No hay notas aprobadas todavía.</div>
+      <!-- Estados (opcionales) -->
+      <div id="mural-loading" class="mural-loading" hidden role="status" aria-live="polite">Cargando notas…</div>
+      <div id="mural-empty" class="mural-empty" hidden role="status" aria-live="polite">No hay notas aprobadas todavía.</div>
 
-    <!-- Capa para notas (aquí se pintan las aprobadas) -->
-    <section id="notes-layer" class="notes-layer" aria-live="polite"></section>
+      <!-- Capa de notas -->
+      <section id="notes-layer" class="notes-layer" aria-live="polite"></section>
 
-    <!-- Vignette/viñeta de bordes -->
-    <div class="vignette" aria-hidden="true"></div>
+      <!-- Viñeteado -->
+      <div class="vignette" aria-hidden="true"></div>
+    </div>
   </main>
 
-  <!-- Scripts: siempre config primero, luego la lógica del mural -->
+  <!-- Scripts: config primero, luego mural -->
   <script src="js/config.js" defer></script>
   <script src="js/mural.js" defer></script>
 

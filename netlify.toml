@@ -4,7 +4,7 @@
 # Proxy del front a tu Apps Script (preserva la query ?p=...)
 [[redirects]]
   from = "/api"
-  to = "https://script.google.com/macros/s/AKfycbyM-43GmY3A9NZFx0OlGYNQLaNgRA90pMTqgRbN13IIapEmfIVn2t2r1whR3yGOZUPuRQ/exec"
+  to = "https://script.google.com/macros/s/AKfycbzEECdS2zqthpKKg0t4raZejFU-9HsJFSnh-Wck6Wlg_hiTR5PaEd-_5sWPADJp2srqxA/exec"
   status = 200
   force = true
 
