@@ -8,7 +8,7 @@ const IS_NETLIFY = /\.netlify\.app$/i.test(location.host);
 // const IS_NETLIFY = false; // <-- fuerza URL directa de Apps Script
 
 // ¡Pon aquí tu URL real de Apps Script (exec)!
-const APPS_SCRIPT_EXEC = 'https://script.google.com/macros/s/AKfycbyM-43GmY3A9NZFx0OlGYNQLaNgRA90pMTqgRbN13IIapEmfIVn2t2r1whR3yGOZUPuRQ/exec';
+const APPS_SCRIPT_EXEC = 'https://script.google.com/macros/s/AKfycbzEECdS2zqthpKKg0t4raZejFU-9HsJFSnh-Wck6Wlg_hiTR5PaEd-_5sWPADJp2srqxA/exec';
 
 const CONFIG = {
   // En Netlify usamos el proxy /api (definido en netlify.toml).
