@@ -7,8 +7,8 @@
 }
 
 :root {
-    --navy-blue: #1a2847;
-    --dark-navy: #0f1829;
+    --navy-blue: #353f79;
+    --dark-navy: #192159;
     --gold: #a8916d;
     --light-gold: #c4ab85;
     --white: #ffffff;
@@ -30,12 +30,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(180deg, 
-        #0f1829 0%, 
-        #1a2847 40%,
-        #243a5e 70%,
-        #1a2847 100%
-    );
+    background: #353f79;
     z-index: -1;
 }
 
@@ -63,16 +58,19 @@ body {
     align-items: center;
     padding: 25px 60px;
     z-index: 1000;
-    background: rgba(15, 24, 41, 0.85);
+    background: #192159;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
 }
 
-.logo img {
-    height: 55px;
-    width: auto;
-    filter: brightness(1.1);
-}
+
+
+
+
+
+
+
+
 
 /* Botón "Ver mural" estilo exacto */
 .btn-mural {
@@ -117,7 +115,7 @@ body {
 
 .hero-content {
     animation: fadeInUp 1s ease-out;
-    margin-top: -40px;
+    margin-top: 80px;
 }
 
 @keyframes fadeInUp {
@@ -131,35 +129,7 @@ body {
     }
 }
 
-/* Número "35" - Estilo exacto */
-.hero-number {
-    font-size: clamp(180px, 28vw, 340px);
-    font-weight: 700;
-    color: #d4af6a;
-    line-height: 0.85;
-    margin-bottom: 0;
-    letter-spacing: -8px;
-    text-shadow: 
-        0 0 40px rgba(212, 175, 106, 0.3),
-        0 4px 20px rgba(212, 175, 106, 0.2);
-    font-family: 'Segoe UI', Arial, sans-serif;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    display: inline-block;
-}
 
-/* Efecto de brillo en hover */
-.hero-number:hover {
-    color: #f5d78e;
-    text-shadow: 
-        0 0 60px rgba(245, 215, 142, 0.6),
-        0 0 100px rgba(245, 215, 142, 0.4),
-        0 4px 30px rgba(245, 215, 142, 0.3),
-        0 8px 40px rgba(212, 175, 106, 0.2);
-    transform: scale(1.05);
-    filter: brightness(1.3);
-}
 
 /* Animación de pulso de brillo */
 @keyframes shimmer {
@@ -1283,6 +1253,63 @@ body {
 .cta-v2 #card-share .share-form input[type="text"],
 .cta-v2 #card-share .share-form input[type="email"] {
   min-height: 44px;
+}
+
+
+/* === FIX: tamaños de logo en NAV + HERO === */
+
+/* Variables globales (incluye HERO, que te faltaban fuera del @media) */
+:root{
+  --nav-h: 90px;          /* alto del header */
+  --nav-logo-h: 154px;     /* alto del logo en navbar */
+
+  /* Control del logo del hero (no gigante) */
+  --hero-logo-min: 200px;
+  --hero-logo-ideal: 50vw;
+  --hero-logo-max: 420px;  /* límite superior para evitar el “mega-logo” */
+}
+
+/* Navbar fijo con altura controlada */
+.navbar{
+  height: var(--nav-h);
+  padding: 0 60px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+
+/* Logo del navbar: sube tamaño y elimina topes */
+.navbar .logo img{
+  height: var(--nav-logo-h) !important;
+  max-height: none !important;  /* quita cualquier tope heredado */
+  width: auto; display:block;
+}
+
+/* El hero respeta la altura del navbar */
+.hero-section{ padding-top: var(--nav-h); }
+
+/* Logo del hero: tamaño controlado por clamp */
+.hero-emblem{
+  display:block;
+  margin-inline:auto;
+  width: clamp(var(--hero-logo-min), var(--hero-logo-ideal), var(--hero-logo-max));
+  height:auto;
+  object-fit:contain;
+}
+
+/* Móvil: compactamos un poco */
+@media (max-width: 640px){
+  :root{
+    --nav-h: 80px;
+    --nav-logo-h: 52px;
+
+    --hero-logo-min: 160px;
+    --hero-logo-ideal: 48vw;
+    --hero-logo-max: 340px;
+  }
+}
+
+/* ⚠️ Sobrescribe cualquier “turbo” en escritorio que lo hacía enorme */
+@media (min-width: 1280px){
+  .hero-emblem{ width: clamp(240px, 24vw, 420px); }
 }
 
 
