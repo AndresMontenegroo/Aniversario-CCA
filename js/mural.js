@@ -1,42 +1,37 @@
-/* ===== Mural 35 Años — v8 (live updates + memoria de posición + drag vs tap + zoom) ===== */
+/* ===== Mural 35 Años — v8.1 (auto-sync por versión + live updates) ===== */
 (function () {
   // ---------- Config ----------
   const API = window.CONFIG?.API_URL || '';
   if (!API) { console.error('[mural] Falta CONFIG.API_URL'); return; }
 
-  // Endpoints (permito override si vinieron en CONFIG.EP; forzados a evitar "health")
-  const EP_A = window.CONFIG?.EP?.comments || window.CONFIG?.EP?.listA || 'comments';
-  const EP_B = window.CONFIG?.EP?.peek     || window.CONFIG?.EP?.listB  || 'peek';
+  // Endpoints backend v4
+  const EP_A = window.CONFIG?.EP?.comments || 'comments';
+  const EP_B = window.CONFIG?.EP?.peek     || 'peek';
+  const EP_V = 'version';
 
-  // Cada cuánto consultamos por nuevos aprobados (sin recargar la página)
-  const REFRESH_MS = Number(window.CONFIG?.REFRESH_MS ?? window.CONFIG?.AUTO_REFRESH_INTERVAL ?? 12000);
+  // Polls
+  const REFRESH_MS       = Number(window.CONFIG?.REFRESH_MS ?? window.CONFIG?.AUTO_REFRESH_INTERVAL ?? 12000); // fallback
+  const VERSION_POLL_MS  = Number(window.CONFIG?.VERSION_POLL_MS ?? 2500); // alta frecuencia para detectar cambios
 
-  // Debug activable con ?debug en la URL
+  // Debug activable con ?debug
   const DEBUG = new URLSearchParams(location.search).has('debug');
   function log(...xs){ if (DEBUG) console.log('[mural]', ...xs); }
 
   // ---------- DOM ----------
   const layer = document.getElementById('notes-layer');
   if (!layer) { console.error('[mural] No existe #notes-layer'); return; }
-  // Asegura contenedor posicionable
   const cs = getComputedStyle(layer);
   if (cs.position === 'static') layer.style.position = 'relative';
   if (layer.clientHeight < 260) layer.style.minHeight = '70vh';
 
-  // Overlay de zoom (se crea on-demand una sola vez)
+  // Overlay de zoom
   let zoomBackdrop = document.querySelector('.zoom-backdrop');
   if (!zoomBackdrop) {
     zoomBackdrop = document.createElement('div');
     zoomBackdrop.className = 'zoom-backdrop';
     document.body.appendChild(zoomBackdrop);
-
-    // Cerrar tocando fuera o con ESC
-    zoomBackdrop.addEventListener('click', (e) => {
-      if (e.target === zoomBackdrop) closeZoom();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeZoom();
-    });
+    zoomBackdrop.addEventListener('click', (e) => { if (e.target === zoomBackdrop) closeZoom(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeZoom(); });
   }
 
   // ---------- Utils ----------
@@ -74,6 +69,7 @@
   }
 
   function normalizeResponse(res) {
+    // Backend v4: { ok:true, items:[...] } o { ok:true, version:N }
     const arr = Array.isArray(res) ? res
       : Array.isArray(res?.items)    ? res.items
       : Array.isArray(res?.comments) ? res.comments
@@ -83,8 +79,9 @@
     return { items: arr, isHealth: gotHealth };
   }
 
+  // items backend v4: { id?, uid, timestamp, nombre, email, comentario, estado, rowIndex }
   const toItem = it => ({
-    id:     it.id || it.ID || it.Id || it.rowId || '',
+    id:     it.id || it.uid || it.rowIndex || it.rowId || '',
     ts:     it.ts || it.timestamp || it.fecha || it.Fecha || '',
     name:   it.name || it.nombre || it.Nombre || 'Anónimo',
     mail:   it.mail || it.email  || it.Email  || '',
@@ -92,7 +89,7 @@
     estado: norm(it.estado || it.status || '')
   });
 
-  // ---------- Loader (caja BLANCA + reloj girando, sin barra) ----------
+  // ---------- Loader (caja blanca + reloj girando) ----------
   const Loader = (() => {
     let el, styled;
     function ensure(){
@@ -114,11 +111,8 @@
           #mural-loader .dots span:nth-child(2){animation-delay:.2s}
           #mural-loader .dots span:nth-child(3){animation-delay:.4s}
           #mural-loader .sub{font-weight:500; font-size:12px; opacity:.7}
-
           @keyframes mrl-dot{0%{opacity:0} 50%{opacity:1} 100%{opacity:0}}
           @keyframes mrl-spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-
-          /* Forzamos caja blanca también en dark mode */
           @media (prefers-color-scheme:dark){
             #mural-loader .box{background:#ffffff; color:#111; border-color:rgba(0,0,0,.08);}
             #mural-loader .text{color:#111}
@@ -158,7 +152,7 @@
     };
   })();
 
-  // ---------- Memoria de posición y z (localStorage) ----------
+  // ---------- Memoria (posición %, z, color) ----------
   const STORE_KEY = 'mural:v1:pos';
   let store = loadStore();
 
@@ -169,24 +163,15 @@
   function saveStore() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch {}
   }
-  function getNoteState(id){
-    return store[id] || null; // { xPct, yPct, z, color }
-  }
-  function setNoteState(id, partial){
-    store[id] = { ...(store[id] || {}), ...partial };
-    saveStore();
-  }
-  function removeNoteState(id){
-    delete store[id]; saveStore();
-  }
+  function getNoteState(id){ return store[id] || null; } // { xPct, yPct, z, color }
+  function setNoteState(id, partial){ store[id] = { ...(store[id] || {}), ...partial }; saveStore(); }
+  function removeNoteState(id){ delete store[id]; saveStore(); }
 
-  // z-index “global” que persiste
   function nextZ(){
     const maxZ = Object.values(store).reduce((m, v) => Math.max(m, Number(v?.z || 0)), 0);
     return (maxZ || 30) + 1;
   }
 
-  // Color estable según id (0..5) si no hay uno guardado
   function colorClass(id){
     const saved = getNoteState(id)?.color;
     if (saved) return saved;
@@ -197,7 +182,7 @@
     return cls;
   }
 
-  // ---------- Mapa de notas actuales en DOM ----------
+  // ---------- Mapa DOM ----------
   const nodeById = new Map(); // id -> HTMLElement .note
 
   // ---------- Colocación ----------
@@ -239,9 +224,10 @@
     setNoteState(id, { xPct, yPct });
   }
 
-  // ---------- Crear nota DOM + interacciones ----------
+  // ---------- Crear nota ----------
   function createNoteEl(data){
     const id = data.id;
+    if (!id) return null; // no crear sin ID estable
     const clsColor = colorClass(id);
 
     const el = document.createElement('article');
@@ -256,65 +242,49 @@
     `;
     layer.appendChild(el);
 
-    // Rotación decorativa mínima (no afecta reubicación)
     const rot = rand(-2.5, 2.5);
     el.style.setProperty('--rot', rot.toFixed(2) + 'deg');
 
-    // Posición inicial: almacenada o aleatoria
     if (!applyStoredPosition(el, id)) {
-      // Debe existir en DOM para medir dimensiones
       randomPlace(el);
-      persistPosition(el, id); // guarda % para próximos renders/resize
+      persistPosition(el, id);
     }
 
-    // z inicial (si lo teníamos guardado)
     const st = getNoteState(id);
     if (st?.z) el.style.zIndex = String(st.z);
 
-    // Interacciones: drag vs tap (zoom)
     wireDragAndTap(el, id);
-
     return el;
   }
 
   function bringToFront(el, id){
-    // sube z y persiste
     const newZ = nextZ();
     el.style.zIndex = String(newZ);
     el.classList.add('note--top');
     setNoteState(id, { z: newZ });
-    // quita la clase top del resto para evitar saturación visual
     nodeById.forEach(n => { if (n !== el) n.classList.remove('note--top'); });
   }
 
   function wireDragAndTap(el, id){
     let dragging = false;
     let moved = false;
-    let sx=0, sy=0; // pointer start
-    let sl=0, st=0; // element start
-    const CLICK_EPS = 6; // px
+    let sx=0, sy=0, sl=0, st=0;
+    const CLICK_EPS = 6;
 
     const onDown = (e) => {
-      // Sólo interacciones primarias
       if (e.button !== undefined && e.button !== 0) return;
       dragging = true; moved = false;
       el.classList.add('note--dragging');
-
       bringToFront(el, id);
 
       const layerRect = layer.getBoundingClientRect();
-
-      // posición actual relativa al layer
       sl = parseFloat(el.style.left || '0');
       st = parseFloat(el.style.top  || '0');
-
       sx = (e.touches?.[0]?.clientX ?? e.clientX) - layerRect.left;
       sy = (e.touches?.[0]?.clientY ?? e.clientY) - layerRect.top;
 
-      // listeners globales hasta soltar
       window.addEventListener('pointermove', onMove);
       window.addEventListener('pointerup', onUp, { once:true });
-      // táctil
       window.addEventListener('touchmove', onMove, { passive:false });
       window.addEventListener('touchend', onUp, { once:true });
     };
@@ -322,18 +292,12 @@
     const onMove = (e) => {
       if (!dragging) return;
       e.preventDefault();
-
       const lx = (e.touches?.[0]?.clientX ?? e.clientX) - layer.getBoundingClientRect().left;
       const ly = (e.touches?.[0]?.clientY ?? e.clientY) - layer.getBoundingClientRect().top;
-
       const dx = lx - sx;
       const dy = ly - sy;
+      if (!moved && (Math.abs(dx) > CLICK_EPS || Math.abs(dy) > CLICK_EPS)) moved = true;
 
-      if (!moved && (Math.abs(dx) > CLICK_EPS || Math.abs(dy) > CLICK_EPS)) {
-        moved = true; // ya es drag, no será tap
-      }
-
-      // límites para no salir de la tabla
       const maxX = layer.clientWidth  - el.offsetWidth;
       const maxY = layer.clientHeight - el.offsetHeight;
       const nx = Math.max(0, Math.min(maxX, sl + dx));
@@ -349,56 +313,40 @@
       if (!dragging) return;
       dragging = false;
 
-      // Si se movió, persistimos y NO hacemos zoom
-      if (moved) {
-        persistPosition(el, id);
-        return;
-      }
-      // Si no se movió (tap/click), abrimos zoom
+      if (moved) { persistPosition(el, id); return; }
       openZoomFrom(el, id);
     };
 
-    // Usamos pointer events (cubre mouse y stylus); touch para compatibilidad iOS
     el.addEventListener('pointerdown', onDown);
-    el.addEventListener('touchstart', (e) => {
-      // iOS: elevamos a pointerdown manual
-      onDown(e);
-    }, { passive:false });
+    el.addEventListener('touchstart', (e) => { onDown(e); }, { passive:false });
   }
 
   // ---------- Zoom ----------
   function openZoomFrom(el, id){
     const content = el.querySelector('.note__content');
     if (!content) return;
-
-    // Clonar contenido para la tarjeta de zoom
-    zoomBackdrop.innerHTML = ''; // limpio
+    zoomBackdrop.innerHTML = '';
     const card = document.createElement('article');
-    card.className = 'zoom-card ' + (getNoteState(id)?.color || colorClass(id));
-    card.innerHTML = `
-      <div class="pin" aria-hidden="true"></div>
-      ${content.outerHTML}
-    `;
+    const cls = getNoteState(id)?.color || [...el.classList].find(c => /^note--c\d$/.test(c)) || 'note--c0';
+    card.className = 'zoom-card ' + cls;
+    card.innerHTML = `<div class="pin" aria-hidden="true"></div>${content.outerHTML}`;
     zoomBackdrop.appendChild(card);
     zoomBackdrop.classList.add('active');
     document.body.classList.add('no-scroll');
   }
-
   function closeZoom(){
     zoomBackdrop.classList.remove('active');
     zoomBackdrop.innerHTML = '';
     document.body.classList.remove('no-scroll');
   }
 
-  // ---------- Ciclo de datos (no reacomoda existentes) ----------
+  // ---------- Datos (agregar/actualizar; quitar los no aprobados) ----------
   async function fetchApproved(){
-    // Intento A: comments
     let rawA = await getJSON(`${API}?p=${EP_A}&estado=aprobado`);
     log('raw A', rawA);
     let { items: A, isHealth: isHealthA } = normalizeResponse(rawA);
     let merged = Array.isArray(A) ? A.map(toItem) : [];
 
-    // Si vino health o vacío, intento B: peek
     if (isHealthA || merged.length === 0) {
       let rawB = await getJSON(`${API}?p=${EP_B}&estado=aprobado&limit=500`);
       log('raw B', rawB);
@@ -406,31 +354,32 @@
       merged = merged.concat(B.map(toItem));
     }
 
-    // Filtra aprobados
     const aprob = merged.filter(x => norm(x.estado) === 'aprobado' || norm(x.estado) === 'aprobados');
-    log('aprobados:', aprob.length);
-    return aprob;
+    return aprob.filter(x => x.id);
   }
 
+  let ticking = false;
   async function tick(){
+    if (ticking) return;
+    ticking = true;
     try{
       const list = await fetchApproved();
-      const incomingIds = new Set(list.map(x => x.id).filter(Boolean));
+      const incomingIds = new Set(list.map(x => x.id));
 
-      // 1) Agregar nuevas (sin tocar las que ya están)
+      // Altas/updates
       for (const it of list) {
-        if (!it.id) continue;
         if (!nodeById.has(it.id)) {
           const el = createNoteEl(it);
-          nodeById.set(it.id, el);
-          // pequeña animación de aparición
-          el.style.opacity = '0';
-          requestAnimationFrame(() => {
-            el.style.transition = 'opacity .18s ease';
-            el.style.opacity = '1';
-          });
+          if (el) {
+            nodeById.set(it.id, el);
+            el.style.opacity = '0';
+            requestAnimationFrame(() => {
+              el.style.transition = 'opacity .18s ease';
+              el.style.opacity = '1';
+            });
+          }
         } else {
-          // Opcional: actualiza texto/autor si cambiaron (sin mover)
+          // actualizar texto/autor si cambian
           const el = nodeById.get(it.id);
           const p = el.querySelector('.note__content p');
           const a = el.querySelector('.note__content .author');
@@ -440,26 +389,53 @@
         }
       }
 
-      // 2) Remover del DOM las que ya no están aprobadas (sin tocar memoria)
+      // Bajas: los que ya NO están aprobados se van del mural
       nodeById.forEach((el, id) => {
         if (!incomingIds.has(id)) {
-          // fade-out corto y remove
           el.style.transition = 'opacity .16s ease';
           el.style.opacity = '0';
           setTimeout(() => {
             if (el.parentNode) el.parentNode.removeChild(el);
             nodeById.delete(id);
-            // La posición/z quedan guardadas por si regresa
           }, 180);
         }
       });
 
     }catch(err){
       console.error('[mural] tick error', err);
+    } finally {
+      ticking = false;
     }
   }
 
-  // ---------- Resize: reaplica % (no reacomoda aleatorio) ----------
+  // ---------- Version watcher (push-like) ----------
+  let lastVersion = 0;
+  let versionBusy = false;
+
+  async function fetchVersion(){
+    try{
+      const res = await getJSON(`${API}?p=${EP_V}`);
+      const v = Number(res?.version || 0);
+      return isFinite(v) ? v : 0;
+    }catch(_){ return 0; }
+  }
+
+  async function watchVersionLoop(){
+    if (versionBusy) return;
+    versionBusy = true;
+    try{
+      const v = await fetchVersion();
+      if (v && v !== lastVersion) {
+        log('version changed', lastVersion, '->', v);
+        lastVersion = v;
+        await tick(); // sincroniza de inmediato (agrega/borra en el mural)
+      }
+    } finally {
+      versionBusy = false;
+    }
+  }
+
+  // ---------- Resize ----------
   function onResize(){
     nodeById.forEach((el, id) => {
       const st = getNoteState(id);
@@ -471,19 +447,21 @@
 
   // ---------- Init ----------
   document.addEventListener('DOMContentLoaded', async () => {
-    // Loader solo en la primera carga completa
     Loader.show('Cargando comentarios');
     try {
-      await tick();
+      await tick(); // primera carga
+      // Inicializa versión base para no disparar un tick inmediato
+      lastVersion = await fetchVersion();
     } finally {
       Loader.hide();
     }
 
-    // Polling “en caliente” para nuevas aprobaciones (sin mover las existentes)
-    if (REFRESH_MS > 0) setInterval(tick, REFRESH_MS);
+    // Push-like: detectar aprobaciones/rechazos casi en tiempo real
+    if (VERSION_POLL_MS > 0) setInterval(watchVersionLoop, VERSION_POLL_MS);
 
-    // Recalcula posiciones relativas ante resize
+    // Fallback: por si la versión no se actualiza, mantener un poll bajo
+    if (REFRESH_MS > 0) setInterval(() => { if (!ticking) tick(); }, REFRESH_MS);
+
     window.addEventListener('resize', onResize);
   });
-
 })();

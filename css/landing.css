@@ -931,3 +931,358 @@ body {
 .btn-cta:hover{ transform: translateY(-1px); border-color: var(--gold); background: rgba(168,145,109,.10); }
 .btn-cta.primary{ border-color: rgba(168,145,109,.6); background: rgba(168,145,109,.14); }
 .btn-cta:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; }
+
+
+/* === [UPDATES] Carousel (fade + controls + dots) === */
+.carousel-wrapper{position:relative;max-width:1200px;margin:0 auto;padding:0 12px}
+.carousel-container{position:relative;overflow:hidden;border-radius:18px;aspect-ratio:16/9;background:radial-gradient(120% 120% at 50% 20%,rgba(255,255,255,.06),transparent 60%),linear-gradient(180deg,rgba(11,46,89,.35),rgba(11,46,89,.15))}
+.carousel-slide{position:absolute;inset:0;opacity:0;transform:scale(1.02);transition:opacity .6s ease,transform .6s ease}
+.carousel-slide.active{opacity:1;transform:scale(1)}
+.carousel-slide img{width:100%;height:100%;object-fit:cover;display:block}
+
+.carousel-overlay{position:absolute;inset:auto 0 0 0;padding:18px 20px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.55) 46%,rgba(0,0,0,.75));color:#fff}
+.carousel-text-main{margin:0 0 6px;font-size:clamp(18px,2.4vw,28px);font-weight:700;letter-spacing:.2px}
+.carousel-text-sub{margin:0;color:rgba(255,255,255,.85);font-size:clamp(13px,1.7vw,16px)}
+
+
+.carousel-indicators{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;gap:8px;z-index:2}
+.indicator{width:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.85);cursor:pointer;transition:transform .2s,background .2s,border-color .2s}
+.indicator:hover{transform:scale(1.15)}
+.indicator.active{background:var(--gold,#c4ab85);border-color:var(--gold,#c4ab85)}
+
+@media (max-width:720px){
+  .carousel-container{aspect-ratio:4/3;border-radius:14px}
+  .carousel-btn{width:38px;height:38px}
+}
+
+/* === [UPDATES] Crossfade hero ↔ secciones (usado por JS) === */
+.hero-content,
+.memorable-moments{transition:opacity .6s ease,transform .6s ease;will-change:opacity,transform}
+
+/* === [UPDATES] CTA v2 (cards con tilt + glow + preview) === */
+.cta-v2{padding:56px 0}
+.cta-v2 .container{max-width:1100px;margin:0 auto;padding:0 16px}
+.section-title{font-size:clamp(22px,3.2vw,30px);margin:0 0 6px}
+.section-description{margin:0 0 22px;color:rgba(255,255,255,.75)}
+
+.cta-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media (max-width:900px){.cta-grid{grid-template-columns:1fr}}
+
+.cta-card{
+  position:relative;overflow:hidden;border-radius:16px;
+  padding:18px;border:1px solid rgba(255,255,255,.12);
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+  transform:perspective(1000px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  will-change:transform;
+}
+.cta-card:hover{border-color:rgba(255,255,255,.18);box-shadow:0 12px 36px rgba(0,0,0,.32)}
+.card-glow{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(320px 220px at var(--mx,50%) var(--my,50%), rgba(196,171,133,.20), transparent 55%);
+  mix-blend-mode:screen;
+}
+
+.card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.card-icon{flex:0 0 auto;width:28px;height:28px;color:var(--gold,#c4ab85);opacity:.95}
+.card-title{margin:0;font-size:clamp(18px,2.4vw,22px);letter-spacing:.2px}
+.card-sub{margin:4px 0 0;color:rgba(255,255,255,.75);font-size:.95rem}
+
+.card-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btn-cta{
+  display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+  border-radius:12px;padding:10px 14px;font-weight:600;text-decoration:none;
+  border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.04);color:#fff;
+  transition:background .2s,border-color .2s,transform .15s ease;
+}
+.btn-cta:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.28)}
+.btn-cta:active{transform:translateY(1px)}
+.btn-cta.primary{
+  border-color:var(--gold,#c4ab85);
+  background:linear-gradient(180deg,rgba(196,171,133,.16),rgba(196,171,133,.10));
+}
+.btn-cta.ghost{background:transparent}
+
+/* Preview fantasma del formulario (solo visual) */
+.form-ghost{display:grid;gap:10px;margin:12px 0 2px}
+.ghost-input{
+  position:relative;height:40px;border-radius:10px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)
+}
+.ghost-input::after{
+  content:attr(data-ph);position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  color:rgba(255,255,255,.55);font-size:.95rem
+}
+.ghost-chip{
+  display:inline-block;padding:6px 10px;border-radius:999px;
+  background:rgba(196,171,133,.16);border:1px solid rgba(196,171,133,.35);
+  color:#f5ead8;font-weight:600;font-size:.9rem
+}
+
+/* Preview única de “Explora” */
+.single-preview{position:relative;overflow:hidden;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03)}
+.single-preview img{width:100%;height:260px;object-fit:cover;display:block}
+@media (max-width:900px){.single-preview img{height:220px}}
+
+/* Mini-toast para “Copiar enlace” */
+.toast{
+  position:absolute;right:10px;bottom:10px;z-index:3;
+  background:rgba(0,0,0,.8);color:#fff;border:1px solid rgba(255,255,255,.15);
+  padding:6px 10px;border-radius:8px;font-size:.85rem;opacity:0;animation:toast-pop .24s ease forwards
+}
+@keyframes toast-pop{to{opacity:1;transform:translateY(-2px)}}
+
+
+/* ===========================================================
+   Share Form — estilos encapsulados (no rompe lo existente)
+   =========================================================== */
+.cta-v2 #card-share {
+  --f-bg: rgba(255,255,255,0.06);
+  --f-bg-hover: rgba(255,255,255,0.10);
+  --f-border: rgba(255,255,255,0.20);
+  --f-border-focus: #C9976B;       /* dorado/acento */
+  --f-ring: color-mix(in oklab, #C9976B 40%, transparent);
+  --f-text: #fff;
+  --f-muted: rgba(255,255,255,0.75);
+  --f-err: #ff6b6b;
+  --f-ok:  #32d296;
+}
+
+/* Contenedor del form */
+.cta-v2 #card-share .share-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin: 12px auto 0;
+  width: min(780px, 100%);
+  padding: 12px;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.03));
+  border-radius: 16px;
+}
+
+/* Dos columnas en pantallas medianas+ */
+@media (min-width: 768px) {
+  .cta-v2 #card-share .share-form {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 16px 18px;
+    padding: 16px 18px;
+  }
+  /* 1: Nombre, 2: Email, 3: Comentario — según el orden actual del HTML */
+  .cta-v2 #card-share .share-form .field:nth-of-type(1) { grid-column: span 6; }
+  .cta-v2 #card-share .share-form .field:nth-of-type(2) { grid-column: span 6; }
+  .cta-v2 #card-share .share-form .field:nth-of-type(3) { grid-column: 1 / -1; }
+  .cta-v2 #card-share .share-form .consent,
+  .cta-v2 #card-share .share-form .card-actions,
+  .cta-v2 #card-share .share-form #form-feedback { grid-column: 1 / -1; }
+}
+
+/* Field */
+.cta-v2 #card-share .share-form .field {
+  display: grid;
+  gap: 6px;
+}
+
+.cta-v2 #card-share .share-form label {
+  color: var(--f-muted);
+  font-size: 0.92rem;
+  letter-spacing: .2px;
+}
+
+/* Inputs & textarea */
+.cta-v2 #card-share .share-form input[type="text"],
+.cta-v2 #card-share .share-form input[type="email"],
+.cta-v2 #card-share .share-form textarea {
+  appearance: none;
+  width: 100%;
+  color: var(--f-text);
+  background: var(--f-bg);
+  border: 1px solid var(--f-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease, transform .06s ease;
+  box-shadow: 0 0 0 0px transparent;
+}
+
+.cta-v2 #card-share .share-form input::placeholder,
+.cta-v2 #card-share .share-form textarea::placeholder {
+  color: color-mix(in oklab, var(--f-muted) 75%, transparent);
+}
+
+.cta-v2 #card-share .share-form input:hover,
+.cta-v2 #card-share .share-form textarea:hover {
+  background: var(--f-bg-hover);
+  border-color: color-mix(in oklab, var(--f-border) 70%, #fff 30%);
+}
+
+.cta-v2 #card-share .share-form input:focus-visible,
+.cta-v2 #card-share .share-form textarea:focus-visible {
+  border-color: var(--f-border-focus);
+  box-shadow: 0 0 0 6px var(--f-ring);
+  background: color-mix(in oklab, var(--f-bg) 60%, transparent);
+}
+
+/* Textarea altura cómoda */
+.cta-v2 #card-share .share-form textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+/* Consent (checkbox + label) */
+.cta-v2 #card-share .share-form .consent {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  align-items: start;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.cta-v2 #card-share .share-form .consent input[type="checkbox"] {
+  margin-top: 4px;
+  width: 18px; height: 18px;
+  accent-color: var(--f-border-focus);
+}
+
+.cta-v2 #card-share .share-form .consent label {
+  color: var(--f-muted);
+  line-height: 1.35;
+}
+
+/* Botones */
+.cta-v2 #card-share .share-form .card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.cta-v2 #card-share .share-form .btn-cta.primary {
+  background: linear-gradient(180deg, #C9976B, #b7835a);
+  color: #0B2E59;
+  border: 1px solid color-mix(in oklab, #C9976B 70%, #7a583e 30%);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  transition: transform .06s ease, box-shadow .2s ease, filter .2s ease;
+  box-shadow: 0 8px 22px rgba(201,151,107,.28);
+}
+
+.cta-v2 #card-share .share-form .btn-cta.primary:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
+.cta-v2 #card-share .share-form .btn-cta.primary:active {
+  transform: translateY(0px) scale(.99);
+  box-shadow: 0 6px 16px rgba(201,151,107,.32);
+}
+
+.cta-v2 #card-share .share-form .btn-cta.primary[disabled] {
+  opacity: .7;
+  cursor: progress;
+}
+
+.cta-v2 #card-share .share-form .btn-cta.ghost {
+  background: var(--f-bg);
+  color: var(--f-text);
+  border: 1px dashed var(--f-border);
+  border-radius: 12px;
+  padding: 11px 14px;
+}
+.cta-v2 #card-share .share-form .btn-cta.ghost:hover {
+  border-style: solid;
+}
+
+/* Mensajitos de ayuda y feedback */
+.cta-v2 #card-share .share-form .hint {
+  color: color-mix(in oklab, var(--f-muted) 70%, transparent);
+  font-size: .82rem;
+}
+
+.cta-v2 #card-share .share-form #form-feedback {
+  margin-top: 4px;
+  font-size: .95rem;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--f-bg);
+  border: 1px solid var(--f-border);
+  color: var(--f-text);
+}
+.cta-v2 #card-share .share-form #form-feedback.ok {
+  border-color: color-mix(in oklab, var(--f-ok) 60%, var(--f-border));
+  background: color-mix(in oklab, var(--f-ok) 12%, var(--f-bg));
+}
+.cta-v2 #card-share .share-form #form-feedback.err {
+  border-color: color-mix(in oklab, var(--f-err) 60%, var(--f-border));
+  background: color-mix(in oklab, var(--f-err) 12%, var(--f-bg));
+}
+
+/* Honeypot fuera de escena */
+.cta-v2 #card-share .share-form .hp {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px; height: 1px; opacity: 0;
+}
+
+/* Pequeño brillo que ya usas en cards, por si lo quieres reusear en feedback/toast */
+.toast {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0B2E59;
+  color: #fff;
+  border: 1px solid #1b426f;
+  padding: 6px 10px;
+  font-size: .82rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(11,46,89,.35);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: toast-pop .18s ease-out, toast-hide .2s ease-in 1.3s forwards;
+}
+@keyframes toast-pop { from {transform: translateX(-50%) translateY(6px); opacity:.0;} to {transform: translateX(-50%) translateY(0); opacity:1;} }
+@keyframes toast-hide { to { opacity: 0; transform: translateX(-50%) translateY(-4px); } }
+
+
+/* ===== Alinear "Tu nombre" y "Correo" en la misma línea (desktop) ===== */
+@media (min-width: 768px) {
+  /* Asegura que el grid no centre verticalmente cosas raras */
+  .cta-v2 #card-share .share-form { align-items: start; }
+
+  /* Alturas estándar para label y hint (ajústalas si quieres) */
+  .cta-v2 #card-share .share-form { --label-h: 24px; --hint-h: 18px; }
+
+  /* Todos los labels con la MISMA altura: evita que el input baje */
+  .cta-v2 #card-share .share-form .field label {
+    display: block;
+    min-height: var(--label-h);
+    line-height: var(--label-h);
+    white-space: nowrap;          /* no permitir salto de línea en desktop */
+    overflow: hidden;
+    text-overflow: ellipsis;      /* si se pasa, que corte con … */
+    margin-bottom: 4px;           /* separa del input */
+  }
+
+  /* Reserva visual para el "hint" aunque falte, así ambos campos cuadran */
+  .cta-v2 #card-share .share-form .field .hint {
+    min-height: var(--hint-h);
+    display: block;
+  }
+
+  /* Si un field NO tiene .hint, añade el espacio para que quede simétrico */
+  .cta-v2 #card-share .share-form .field:not(:has(.hint)) {
+    padding-bottom: var(--hint-h);
+  }
+}
+
+/* Altura consistente del input por si usas otros resets */
+.cta-v2 #card-share .share-form input[type="text"],
+.cta-v2 #card-share .share-form input[type="email"] {
+  min-height: 44px;
+}
+
+

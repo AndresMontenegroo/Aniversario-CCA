@@ -1,18 +1,48 @@
 [build]
+  # Si es sitio estático puro, deja "."
   publish = "."
 
-# Proxy del front a tu Apps Script (preserva la query ?p=...)
+# ===== Proxy al GAS (preserva query ?p=...) =====
+# Proxy principal (puedes seguir usando /api o /api/mural según tu config.js)
+
+# --- Function para SUBMIT ---
 [[redirects]]
-  from = "/api"
-  to = "https://script.google.com/macros/s/AKfycbyM-43GmY3A9NZFx0OlGYNQLaNgRA90pMTqgRbN13IIapEmfIVn2t2r1whR3yGOZUPuRQ/exec"
+  from = "/api/mural-submit"
+  to = "/.netlify/functions/mural-submit"
   status = 200
   force = true
 
-# (Opcional) Cache básico para archivos estáticos
+
+[[redirects]]
+  from = "/api/mural"
+  to = "https://script.google.com/macros/s/AKfycbw5qvphWfLm4cvIlIVRFInpBUh6oOee2TkdixBn1rXn1V7_w6xuFmW-I1jDV14FWOLGVw/exec"
+  status = 200
+  force = true
+
+# ✅ (Quitamos la de /api/mural/* con :splat)
+
+# Conveniencia: /api → /api/mural
+[[redirects]]
+  from = "/api"
+  to = "/api/mural"
+  status = 200
+  force = true   # <- ahora true
+
+# ===== Headers =====
+# Sin caché para la API (cuando llames /api?p=... )
+[[headers]]
+  for = "/api*"
+  [headers.values]
+    Cache-Control = "no-store"
+
+# Sin caché para la API (cuando llames /api/mural?p=... )
+[[headers]]
+  for = "/api/mural*"
+  [headers.values]
+    Cache-Control = "no-store"
+
+# Caché estático conservador para todo lo demás
 [[headers]]
   for = "/*"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
-
-
-   
