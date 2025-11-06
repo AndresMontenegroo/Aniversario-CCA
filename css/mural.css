@@ -432,3 +432,91 @@ body.no-scroll{ overflow:hidden; }
   0%,100%{ transform: translateX(-50%) rotate(0deg); }
   50%{    transform: translateX(-50%) rotate(.6deg); }
 }
+
+
+/* =========================================================
+   Mural — Ajustes móviles (notas más pequeñas y fluidas)
+   Pega esto AL FINAL del CSS. Override friendly. 
+   ========================================================= */
+
+/* Teléfonos medianos ≤ 480px */
+@media (max-width: 480px){
+  :root{
+    --note-fs: 13px;          /* texto de la nota un pelín más chico */
+    --note-author-fs: 11px;   /* autor pequeño pero legible */
+    --note-lines: 4;          /* menos líneas en grid para evitar corte feo */
+    --board-pad: clamp(8px, 4vw, 14px); /* más compacto en bordes */
+  }
+
+  /* Más área útil para notas dentro del marco */
+  #notes-layer,
+  .notes-layer{
+    inset: calc(var(--frame) + 48px) 10px 14px 10px !important;
+    min-height: 180px;
+  }
+
+  /* Las notas: más pequeñas y con menos padding */
+  .note{
+    width: clamp(84px, 44vw, 128px) !important;
+    padding: 10px 10px !important;
+    border-radius: 10px;
+  }
+
+  /* Chincheta más pequeña y cercana */
+  .pin{
+    width: 36px; height: 36px;
+    top: -14px;
+  }
+
+  /* Centro de marca un poco más discreto para no tapar notas */
+  .center-mark .num{
+    font-size: clamp(72px, 18vw, 120px);
+  }
+  .center-mark .years{ font-size: clamp(16px, 2vw, 22px); }
+  .center-mark .slogan{ font-size: clamp(18px, 2.4vw, 26px); }
+}
+
+/* Teléfonos pequeños/estrechos ≤ 360px (modo “tamagotchi”) */
+@media (max-width: 360px){
+  :root{
+    --note-fs: 12px;
+    --note-author-fs: 10px;
+    --note-lines: 4;
+    --board-pad: clamp(6px, 4.5vw, 12px);
+  }
+
+  #notes-layer,
+  .notes-layer{
+    inset: calc(var(--frame) + 46px) 8px 12px 8px !important;
+    min-height: 160px;
+  }
+
+  .note{
+    width: clamp(72px, 46vw, 114px) !important;
+    padding: 8px 9px !important;
+    border-radius: 9px;
+  }
+
+  .pin{
+    width: 32px; height: 32px;
+    top: -12px;
+  }
+
+  /* Zoom modal: adapta pin y caja para pantallas mini */
+  .zoom-card{
+    width: 94vw;
+    padding-top: 46px;           /* deja sitio para la chincheta */
+  }
+  .zoom-card .pin{
+    width: 56px; height: 56px;   /* más pequeña que en desktop */
+    top: -22px;
+  }
+}
+
+/* Suaviza hover en móvil (menos “salto” visual si hay emulación) */
+@media (hover:none){
+  .note:hover{
+    transform: translateY(-1px) rotate(calc(var(--rot, 0deg)));
+    box-shadow: 0 12px 28px rgba(0,0,0,.26);
+  }
+}
