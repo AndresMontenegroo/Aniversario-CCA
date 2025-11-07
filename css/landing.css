@@ -162,7 +162,7 @@ body{
   text-shadow:0 2px 20px rgba(196,171,133,.25);
 }
 .hero-tagline {
-  margin-top: 100px;
+  margin-top: 50px;
   font-size: clamp(14px, 1.8vw, 22px);
   width: min(85%, 1000px);
   color: rgb(255, 255, 255);
