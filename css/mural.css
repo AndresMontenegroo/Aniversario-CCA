@@ -168,18 +168,22 @@ body.no-scroll{ overflow:hidden; }
 
 /* Marca central (debajo de notas) */
 .center-mark{
-  position:absolute; inset:0; display:grid; place-items:center;
+  position:relative;   inset:0; display:grid; place-items:center;
   text-align:center; color:#000; z-index:5; pointer-events:none;
+  margin-top: 120px;
 }
-.center-mark .num{
-  font-family:"Playfair Display", serif;
+.center-mark .num {
+  font-family: "Playfair Display", serif;
   font-size: clamp(120px, 18vw, 220px);
-  line-height:.8; letter-spacing:.02em;
-  text-shadow: 0 2px 0 rgba(0,0,0,.25);
+  line-height: 0.8;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+ margin-bottom: 50px;
 }
 .center-mark .years{
   margin-top:6px; font-size: clamp(18px, 2.4vw, 28px); letter-spacing:.12em;
   display:flex; align-items:center; justify-content:center; gap:16px;
+  margin-top: 5px;
 }
 .center-mark .years .line{
   display:inline-block; width:min(120px,16vw); height:1px; background:#2d2d2d; opacity:.6;
@@ -529,7 +533,7 @@ body.no-scroll{ overflow:hidden; }
   /* Azul oscuro con volumen suave */
   background:
     linear-gradient(90deg, rgba(107, 254, 1, 0.05), transparent 30%, transparent 70%, rgba(0,0,0,.25)),
-    linear-gradient(180deg, #73b10f 0%, #0f380b 100%);
+    linear-gradient(180deg, #b1a74a 0%, #0f380b 100%);
 
   /* Deja solo el anillo del marco */
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
