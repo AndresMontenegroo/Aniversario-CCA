@@ -16,7 +16,7 @@ window.scrollToContent = scrollToContent;
     { file: "moment1.jpg", title: "Eagles Plateau" },
     { file: "moment2.jpg", title: "Primer Musical" },
     { file: "moment3.jpg", title: "Personitas 1995" },
-    { file: "moment4.jpg", title: "RAdio Xtrema"},
+    { file: "moment4.jpg", title: "Radio Xtrema"},
     { file: "moment5.jpg", title: "Summer Camp US" },
   ];
   const PING_FILE = "logo.png";
