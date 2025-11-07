@@ -1,9 +1,8 @@
 /* ===== Mural 35 Años — v8.2 (marco madera ultra + corcho pro + bordes delgados) ===== */
 :root{
-  --wood:#7a441a;
-  --wood-dark:#5c320f;
-  --ink:#1a1a1a;
-  --shadow:rgba(0,0,0,.35);
+  --wood:#353f79;
+  --wood-dark:#192159;
+ 
 
   --note-lines: 5;
   --note-fs: 14px;
@@ -43,43 +42,7 @@ body.no-scroll{ overflow:hidden; }
   box-shadow: 0 10px 40px var(--shadow);
 }
 
-/* Marco de madera: se dibuja en ::before con máscara (sólo bordes) */
-.board--framed{
-  background: transparent; /* el marco lo pinta ::before */
-}
-.board--framed::before{
-  content:"";
-  position:absolute; inset:0;
-  padding: var(--frame);                   /* ancho del marco */
-  border-radius: inherit;
-  pointer-events:none;
-  z-index:2;
 
-  /* Textura madera: base + vetas + nudos + luces */
-  background:
-    /* luces laterales sutiles */
-    linear-gradient(90deg, rgba(255,225,180,.08), transparent 30%, transparent 70%, rgba(75,40,10,.08)),
-    /* vetas largas */
-    repeating-linear-gradient(7deg,
-      rgba(78,45,18,.22) 0 3px, rgba(78,45,18,.16) 3px 6px, rgba(210,165,105,.14) 6px 9px, rgba(130,82,39,.16) 9px 13px),
-    /* nudos */
-    radial-gradient(40px 28px at 12% 22%, rgba(60,35,12,.20) 0 40%, transparent 45%),
-    radial-gradient(36px 26px at 84% 68%, rgba(60,35,12,.18) 0 40%, transparent 45%),
-    radial-gradient(32px 24px at 32% 78%, rgba(60,35,12,.15) 0 40%, transparent 45%),
-    /* base madera */
-    linear-gradient(180deg, var(--wood) 0%, var(--wood-dark) 100%);
-
-  /* Recorta el centro: deja sólo el anillo del marco */
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-
-  /* Bisel y volumen del marco */
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.06),
-    inset 0 0 0 2px rgba(0,0,0,.25),
-    inset 0 8px 24px rgba(0,0,0,.28);
-}
 
 /* Realce extra de cantos (brillos/sombras suaves) */
 .board--framed::after{
@@ -519,4 +482,63 @@ body.no-scroll{ overflow:hidden; }
     transform: translateY(-1px) rotate(calc(var(--rot, 0deg)));
     box-shadow: 0 12px 28px rgba(0,0,0,.26);
   }
+}
+
+
+/* === Notas 40% más pequeñas (override) ================= */
+.note{
+  width: clamp(72px, 10vw, 108px) !important; /* antes: 120px,17vw,180px */
+  aspect-ratio: 1 / 1;                        /* cuadradas */
+  padding: 8px 8px !important;                /* era 12px */
+}
+
+/* Ajusta la chincheta en proporción */
+.pin{
+  width: 28px; 
+  height: 28px;
+  top: -10px;
+}
+
+/* Breakpoints equivalentes (manteniendo el -40%) */
+@media (max-width: 900px){
+  .note{ width: clamp(66px, 19vw, 96px) !important; }    /* antes: 110px,32vw,160px */
+}
+@media (max-width: 600px){
+  .note{ width: clamp(60px, 47vw, 90px) !important; }    /* antes: 100px,78vw,150px */
+}
+@media (max-width: 480px){
+  .note{ width: clamp(50px, 26vw, 77px) !important; }    /* antes: 84px,44vw,128px */
+  .pin{ width: 24px; height: 24px; top: -9px; }
+}
+@media (max-width: 360px){
+  .note{ width: clamp(44px, 28vw, 68px) !important; }    /* antes: 72px,46vw,114px */
+  .pin{ width: 22px; height: 22px; top: -8px; }
+}
+
+/* === Frame azul oscuro (override) ======================= */
+.board--framed{ background: transparent; }
+
+.board--framed::before{
+  content:"";
+  position:absolute; inset:0;
+  padding: var(--frame);
+  border-radius: inherit;
+  pointer-events:none;
+  z-index:2;
+
+  /* Azul oscuro con volumen suave */
+  background:
+    linear-gradient(90deg, rgba(107, 254, 1, 0.05), transparent 30%, transparent 70%, rgba(0,0,0,.25)),
+    linear-gradient(180deg, #73b10f 0%, #0f380b 100%);
+
+  /* Deja solo el anillo del marco */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+
+  /* Bisel */
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.06),
+    inset 0 0 0 2px rgba(0,0,0,.35),
+    inset 0 8px 24px rgba(0,0,0,.38);
 }
