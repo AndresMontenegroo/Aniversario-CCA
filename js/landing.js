@@ -13,11 +13,11 @@ window.scrollToContent = scrollToContent;
 /* ========================= Carrusel desde /assets ========================= */
 (function () {
   const ITEMS = [
-    { file: "moment1.jpg", title: "Una comunidad que aprende", sub: "Celebramos cada logro, cada amistad y cada nuevo comienzo." },
-    { file: "moment2.jpg", title: "Construyendo sueños juntos", sub: "Cada día es una nueva oportunidad para crecer y aprender." },
-    { file: "moment3.jpg", title: "35 años de excelencia",     sub: "Formando líderes que transforman el mundo." },
-    { file: "moment4.jpg", title: "Historias que inspiran",     sub: "Cada estudiante escribe su propia historia de éxito." },
-    { file: "moment5.jpg", title: "Juntos hacia el futuro",     sub: "Continuamos construyendo un legado de excelencia educativa." },
+    { file: "moment1.jpg", title: "Eagles Plateau" },
+    { file: "moment2.jpg", title: "Primer Musical" },
+    { file: "moment3.jpg", title: "Personitas 1995" },
+    { file: "moment4.jpg", title: "RAdio Xtrema"},
+    { file: "moment5.jpg", title: "Summer Camp US" },
   ];
   const PING_FILE = "logo.png";
 

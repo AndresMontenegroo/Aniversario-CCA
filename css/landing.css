@@ -154,13 +154,14 @@ body{
 }
 .hero-tagline {
   font-size: clamp(14px, 1.8vw, 22px);
-  width: min(85%, 680px);
-  color: rgba(255,255,255,0.65);
+  width: min(85%, 980px);
+  color: rgb(255, 255, 255);
   font-weight: 300;
   letter-spacing: clamp(2px, 0.35vw, 6px);
   line-height: 1.5;
   margin-top: 1rem;
   text-align: center;
+
 }
 
 .scroll-indicator{
@@ -185,9 +186,11 @@ body{
 }
 .moments-container{ max-width:1200px; margin:0 auto; }
 .moments-title{
-  font-size:clamp(36px,5.5vw,54px); font-weight:300; text-align:center;
+  font-size:clamp(56px,5.5vw,54px); font-weight:300; text-align:center;
   margin-bottom:12px; color:#b1a74a; /* >>> legible sobre blanco */
   letter-spacing:2px; position:relative; z-index:1;
+  font-weight: bold;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
 }
 .moments-subtitle{
   font-size:clamp(16px,1.8vw,19px); text-align:center; color:#b1a74a; /* >>> contraste medio */
