@@ -11,6 +11,14 @@
    ================================================= */
 
 /* ========== 1) TOKENS Y BASE ========== */
+@font-face {
+  font-family: 'MiFuente';
+  src: url('../assets/hk-grotesk.light.otf') format('woff2'),
+       url('../assets/hk-grotesk.light.otf') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root{
   /* Paleta */
   --navy-blue: #353f79;
@@ -125,6 +133,7 @@ body{
 @keyframes fadeInUp{ from{opacity:0; transform:translateY(30px);} to{opacity:1; transform:translateY(0);} }
 
 .hero-emblem {
+  margin-top: 100px;
   max-width: min(100%, 520px);
   height: auto;
 }
@@ -153,13 +162,16 @@ body{
   text-shadow:0 2px 20px rgba(196,171,133,.25);
 }
 .hero-tagline {
+  margin-top: 100px;
   font-size: clamp(14px, 1.8vw, 22px);
-  width: min(85%, 980px);
+  width: min(85%, 1000px);
   color: rgb(255, 255, 255);
-  font-weight: 300;
+  font-family:miFuente;
+  
+  font-weight: bolder;
   letter-spacing: clamp(2px, 0.35vw, 6px);
   line-height: 1.5;
-  margin-top: 1rem;
+  
   text-align: center;
 
 }
@@ -266,8 +278,8 @@ body{
 /* ========== 6) CTA v2 + FORM (encapsulado) ========== */
 .cta-v2{ padding:56px 0; }
 .cta-v2 .container{ max-width:1100px; margin:0 auto; padding:0 16px; }
-.section-title{ font-size:clamp(22px,3.2vw,30px); margin:0 0 6px; letter-spacing:2px; text-align:center; }
-.section-description{ margin:0 0 22px; color:rgba(255,255,255,.75); text-align:center; max-width:700px; margin-inline:auto; }
+.section-title{ font-size:70px; margin:0 0 6px; letter-spacing:2px; text-align:center; font-family: miFuente; font-weight: bold;}
+.section-description{ margin:0 0 22px; color:rgba(255,255,255,.75); text-align:center; max-width:1000px; margin-inline:auto;font-size: 30px;  font-family: miFuente;}
 
 .cta-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
 .cta-card{
@@ -305,8 +317,9 @@ body{
   background:linear-gradient(180deg, rgba(196,171,133,.16), rgba(196,171,133,.10));
 }
 
-.single-preview{ position:relative; overflow:hidden; border-radius:12px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03); }
-.single-preview img{ width:100%; height:260px; object-fit:cover; display:block; }
+
+.single-preview{ position:relative; overflow:hidden; border-radius:12px; border:1px solid #192159; background:rgba(255,255,255,.03); }
+.single-preview img{ width:100%; height:460px; object-fit:cover; display:block; }
 
 .cta-v2 #card-share{
   --f-bg: rgba(255,255,255,.06);
