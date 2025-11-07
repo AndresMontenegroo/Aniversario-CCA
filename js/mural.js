@@ -265,17 +265,43 @@
     nodeById.forEach(n => { if (n !== el) n.classList.remove('note--top'); });
   }
 
+  // ---------- ★ iOS/drag: estilos mínimos para pointer events y scroll interno ----------
+  (function ensureIOSDragStyles(){
+    if (document.getElementById('mural-ios-drag-style')) return;
+    const st = document.createElement('style');
+    st.id = 'mural-ios-drag-style';
+    st.textContent = `
+      .note{ touch-action:none; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+      .note__content{ -webkit-overflow-scrolling:touch; touch-action:auto; }
+      body.no-scroll{ overflow:hidden; }
+    `;
+    document.head.appendChild(st);
+  })();
+
   function wireDragAndTap(el, id){
     let dragging = false;
     let moved = false;
     let sx=0, sy=0, sl=0, st=0;
     const CLICK_EPS = 6;
 
+    // ★ iOS/drag: asegurar flags directos por si los CSS no cargan aún
+    el.style.touchAction = 'none';
+    el.style.webkitUserSelect = 'none';
+    el.style.userSelect = 'none';
+    el.style.webkitTouchCallout = 'none';
+
     const onDown = (e) => {
       if (e.button !== undefined && e.button !== 0) return;
+      // ★ iOS/drag: capturar el puntero para que los move/up no se pierdan
+      if (e.pointerId != null && el.setPointerCapture) {
+        try { el.setPointerCapture(e.pointerId); } catch {}
+      }
+      if (e.cancelable) e.preventDefault();
+
       dragging = true; moved = false;
       el.classList.add('note--dragging');
       bringToFront(el, id);
+      document.body.classList.add('no-scroll'); // evita que la página se desplace
 
       const layerRect = layer.getBoundingClientRect();
       sl = parseFloat(el.style.left || '0');
@@ -283,15 +309,15 @@
       sx = (e.touches?.[0]?.clientX ?? e.clientX) - layerRect.left;
       sy = (e.touches?.[0]?.clientY ?? e.clientY) - layerRect.top;
 
-      window.addEventListener('pointermove', onMove);
-      window.addEventListener('pointerup', onUp, { once:true });
+      window.addEventListener('pointermove', onMove, { passive:false });
+      window.addEventListener('pointerup', onUp, { once:true, passive:false });
       window.addEventListener('touchmove', onMove, { passive:false });
       window.addEventListener('touchend', onUp, { once:true });
     };
 
     const onMove = (e) => {
       if (!dragging) return;
-      e.preventDefault();
+      if (e.cancelable) e.preventDefault(); // necesario en iOS para parar el scroll
       const lx = (e.touches?.[0]?.clientX ?? e.clientX) - layer.getBoundingClientRect().left;
       const ly = (e.touches?.[0]?.clientY ?? e.clientY) - layer.getBoundingClientRect().top;
       const dx = lx - sx;
@@ -306,16 +332,30 @@
       el.style.top  = Math.round(ny) + 'px';
     };
 
-    const onUp = () => {
+    const onUp = (e) => {
       window.removeEventListener('pointermove', onMove);
       window.removeEventListener('touchmove', onMove);
       el.classList.remove('note--dragging');
+
+      // ★ iOS/drag: liberar captura
+      if (e && e.pointerId != null && el.releasePointerCapture) {
+        try { el.releasePointerCapture(e.pointerId); } catch {}
+      }
+      document.body.classList.remove('no-scroll');
+
       if (!dragging) return;
       dragging = false;
 
       if (moved) { persistPosition(el, id); return; }
       openZoomFrom(el, id);
     };
+
+    // ★ iOS/drag: por si el SO cancela la captura
+    el.addEventListener('lostpointercapture', () => {
+      dragging = false;
+      document.body.classList.remove('no-scroll');
+      el.classList.remove('note--dragging');
+    });
 
     el.addEventListener('pointerdown', onDown);
     el.addEventListener('touchstart', (e) => { onDown(e); }, { passive:false });
