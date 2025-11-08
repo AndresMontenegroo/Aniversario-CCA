@@ -16,19 +16,22 @@ window.scrollToContent = scrollToContent;
     { file: "moment1.jpg", title: "Eagles Plateau" },
     { file: "moment2.jpg", title: "Primer Musical" },
     { file: "moment3.jpg", title: "Personitas 1995" },
-    { file: "moment4.jpg", title: "Radio Xtrema"},
+    { file: "moment4.jpg", title: "Radio Xtrema" },
     { file: "moment5.jpg", title: "Summer Camp US" },
   ];
   const PING_FILE = "logo.png";
 
   const container = document.querySelector(".carousel-container");
-  const dotsWrap  = document.querySelector(".carousel-indicators");
-  const prevBtn   = document.querySelector(".carousel-btn.prev");
-  const nextBtn   = document.querySelector(".carousel-btn.next");
+  const dotsWrap = document.querySelector(".carousel-indicators");
+  const prevBtn = document.querySelector(".carousel-btn.prev");
+  const nextBtn = document.querySelector(".carousel-btn.next");
   if (!container || !dotsWrap || !ITEMS.length) return;
 
   container.setAttribute("role", container.getAttribute("role") || "region");
-  container.setAttribute("aria-roledescription", container.getAttribute("aria-roledescription") || "carousel");
+  container.setAttribute(
+    "aria-roledescription",
+    container.getAttribute("aria-roledescription") || "carousel"
+  );
   container.setAttribute("tabindex", container.getAttribute("tabindex") || "0");
   container.style.touchAction = container.style.touchAction || "pan-y";
   prevBtn?.setAttribute("aria-label", "Anterior");
@@ -55,11 +58,21 @@ window.scrollToContent = scrollToContent;
     container.innerHTML = ITEMS.map((it, i) => {
       const id = `slide-${i + 1}`;
       return `
-        <div id="${id}" class="carousel-slide${i === 0 ? " active" : ""}" role="group" aria-roledescription="slide"
-             aria-label="${i + 1} de ${ITEMS.length}" aria-hidden="${i === 0 ? "false" : "true"}">
-          <img src="${ASSETS + it.file}" alt="${it.title || "Momento memorable"}"
+        <div id="${id}" class="carousel-slide${
+        i === 0 ? " active" : ""
+      }" role="group" aria-roledescription="slide"
+             aria-label="${i + 1} de ${ITEMS.length}" aria-hidden="${
+        i === 0 ? "false" : "true"
+      }">
+          <img src="${ASSETS + it.file}" alt="${
+        it.title || "Momento memorable"
+      }"
                width="1600" height="900"
-               ${i === 0 ? 'decoding="async" fetchpriority="high"' : 'loading="lazy" decoding="async"'} />
+               ${
+                 i === 0
+                   ? 'decoding="async" fetchpriority="high"'
+                   : 'loading="lazy" decoding="async"'
+               } />
           <div class="carousel-overlay">
             <h3 class="carousel-text-main">${it.title || ""}</h3>
             <p class="carousel-text-sub">${it.sub || ""}</p>
@@ -73,20 +86,27 @@ window.scrollToContent = scrollToContent;
       const id = `slide-${i + 1}`;
       return `
         <span class="indicator${i === 0 ? " active" : ""}" role="tab"
-              aria-controls="${id}" aria-selected="${i === 0 ? "true" : "false"}"></span>
+              aria-controls="${id}" aria-selected="${
+        i === 0 ? "true" : "false"
+      }"></span>
       `;
     }).join("");
 
-    const slides     = Array.from(document.querySelectorAll(".carousel-slide"));
+    const slides = Array.from(document.querySelectorAll(".carousel-slide"));
     const indicators = Array.from(document.querySelectorAll(".indicator"));
 
     slides.forEach((s, i) => {
       const img = s.querySelector("img");
-      if (img && i !== 0) { img.loading = img.loading || "lazy"; img.decoding = img.decoding || "async"; }
+      if (img && i !== 0) {
+        img.loading = img.loading || "lazy";
+        img.decoding = img.decoding || "async";
+      }
     });
 
     let current = 0;
-    const prefersReduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
     let timer = null;
     const INTERVAL = 6000;
 
@@ -115,38 +135,67 @@ window.scrollToContent = scrollToContent;
       navLock = true;
       showSlide(current + step);
       restart();
-      setTimeout(() => { navLock = false; }, LOCK_MS);
+      setTimeout(() => {
+        navLock = false;
+      }, LOCK_MS);
     }
     function goToSlide(idx) {
       if (navLock) return;
       navLock = true;
       showSlide(idx);
       restart();
-      setTimeout(() => { navLock = false; }, LOCK_MS);
+      setTimeout(() => {
+        navLock = false;
+      }, LOCK_MS);
     }
 
     window.moveCarousel = moveCarousel;
-    window.goToSlide    = goToSlide;
+    window.goToSlide = goToSlide;
 
-    function start(){ if (!prefersReduce){ stop(); timer = setInterval(() => moveCarousel(1), INTERVAL); } }
-    function stop(){ if (timer) clearInterval(timer); timer = null; }
-    function restart(){ if (!prefersReduce){ stop(); start(); } }
+    function start() {
+      if (!prefersReduce) {
+        stop();
+        timer = setInterval(() => moveCarousel(1), INTERVAL);
+      }
+    }
+    function stop() {
+      if (timer) clearInterval(timer);
+      timer = null;
+    }
+    function restart() {
+      if (!prefersReduce) {
+        stop();
+        start();
+      }
+    }
 
-    ["pointerdown","pointerup","click"].forEach(ev => {
-      prevBtn?.addEventListener(ev, e => { e.stopPropagation(); });
-      nextBtn?.addEventListener(ev, e => { e.stopPropagation(); });
+    ["pointerdown", "pointerup", "click"].forEach((ev) => {
+      prevBtn?.addEventListener(ev, (e) => {
+        e.stopPropagation();
+      });
+      nextBtn?.addEventListener(ev, (e) => {
+        e.stopPropagation();
+      });
     });
-    prevBtn?.addEventListener("click", (e) => { e.preventDefault(); moveCarousel(-1); });
-    nextBtn?.addEventListener("click", (e) => { e.preventDefault(); moveCarousel(1); });
-
-    indicators.forEach((d, i) => d.addEventListener("click", (e) => {
-      e.stopPropagation();
+    prevBtn?.addEventListener("click", (e) => {
       e.preventDefault();
-      goToSlide(i);
-    }));
+      moveCarousel(-1);
+    });
+    nextBtn?.addEventListener("click", (e) => {
+      e.preventDefault();
+      moveCarousel(1);
+    });
+
+    indicators.forEach((d, i) =>
+      d.addEventListener("click", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        goToSlide(i);
+      })
+    );
 
     container.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowLeft")  moveCarousel(-1);
+      if (e.key === "ArrowLeft") moveCarousel(-1);
       if (e.key === "ArrowRight") moveCarousel(1);
     });
 
@@ -155,33 +204,44 @@ window.scrollToContent = scrollToContent;
     container.addEventListener("focusin", stop);
     container.addEventListener("focusout", start);
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden) stop(); else start();
+      if (document.hidden) stop();
+      else start();
     });
 
-    let x0 = null, activePid = null;
-    container.addEventListener("pointerdown", e => {
+    let x0 = null,
+      activePid = null;
+    container.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "mouse") return;
-      if (e.target.closest(".carousel-btn") || e.target.closest(".indicator")) return;
+      if (e.target.closest(".carousel-btn") || e.target.closest(".indicator"))
+        return;
       activePid = e.pointerId;
       x0 = e.clientX;
-      try { container.setPointerCapture(activePid); } catch(_) {}
+      try {
+        container.setPointerCapture(activePid);
+      } catch (_) {}
     });
-    container.addEventListener("pointerup", e => {
+    container.addEventListener("pointerup", (e) => {
       if (e.pointerType === "mouse") return;
       if (e.pointerId !== activePid) return;
       const dx = e.clientX - (x0 ?? e.clientX);
-      if (Math.abs(dx) > 40) (dx < 0 ? moveCarousel(1) : moveCarousel(-1));
-      x0 = null; activePid = null;
-      try { container.releasePointerCapture(e.pointerId); } catch(_) {}
+      if (Math.abs(dx) > 40) dx < 0 ? moveCarousel(1) : moveCarousel(-1);
+      x0 = null;
+      activePid = null;
+      try {
+        container.releasePointerCapture(e.pointerId);
+      } catch (_) {}
     });
-    container.addEventListener("pointercancel", () => { x0 = null; activePid = null; });
+    container.addEventListener("pointercancel", () => {
+      x0 = null;
+      activePid = null;
+    });
 
     showSlide(0);
     start();
 
-    const heroContent     = document.querySelector(".hero-content");
-    const heroNumber      = document.querySelector(".hero-number");
-    const momentsSection  = document.querySelector(".memorable-moments");
+    const heroContent = document.querySelector(".hero-content");
+    const heroNumber = document.querySelector(".hero-number");
+    const momentsSection = document.querySelector(".memorable-moments");
 
     if (heroNumber && !prefersReduce) {
       heroNumber.style.opacity = "0";
@@ -215,7 +275,7 @@ window.scrollToContent = scrollToContent;
     }
 
     const clamp01 = (v) => Math.max(0, Math.min(1, v));
-    const VANISH_AT = 0.70;
+    const VANISH_AT = 0.7;
 
     function applyCrossfade() {
       if (prefersReduce) return;
@@ -224,90 +284,105 @@ window.scrollToContent = scrollToContent;
 
       const tA = clamp01(y / (h * VANISH_AT));
       if (heroContent) {
-        const oHero = 1 - tA;
-        heroContent.style.opacity = String(oHero);
-        heroContent.style.transform = `translateY(${(-8 * tA).toFixed(2)}px)`;
-        heroContent.style.pointerEvents = (oHero <= 0.02) ? "none" : "auto";
+        heroContent.style.opacity = "1"; // opacidad fija
+        heroContent.style.transform = `translateY(${(-8 * tA).toFixed(2)}px)`; // mantiene movimiento sutil
+        heroContent.style.pointerEvents = "auto";
       }
 
       let oCarIn = tA;
-      let carTranslateY = (16 * (1 - oCarIn));
+      let carTranslateY = 16 * (1 - oCarIn);
 
       if (momentsSection && nextSection) {
-        const nextTop = nextSection.getBoundingClientRect().top;
-        const startY  = h * 0.75;
-        const spanY   = h * 0.60;
-        const tB      = clamp01((startY - nextTop) / spanY);
-
-        const oCar = oCarIn * (1 - tB);
-        const upExtra = -8 * tB;
-        const totalTranslateY = carTranslateY + upExtra;
-
-        momentsSection.style.opacity = String(oCar);
-        momentsSection.style.transform = `translateY(${totalTranslateY.toFixed(2)}px)`;
-        momentsSection.style.pointerEvents = (oCar <= 0.02) ? "none" : "auto";
-
-        const oNext = tB;
-        nextSection.style.opacity = String(oNext);
-        nextSection.style.transform = `translateY(${(16 * (1 - oNext)).toFixed(2)}px)`;
-        nextSection.style.pointerEvents = (oNext <= 0.02) ? "none" : "auto";
+        momentsSection.style.opacity = "1"; // desactiva fade
+        momentsSection.style.transform = `translateY(${totalTranslateY.toFixed(
+          2
+        )}px)`;
+        nextSection.style.opacity = "1"; // desactiva fade
+        nextSection.style.transform = `translateY(${(16 * (1 - oNext)).toFixed(
+          2
+        )}px)`;
       } else if (momentsSection) {
         momentsSection.style.opacity = String(oCarIn);
-        momentsSection.style.transform = `translateY(${carTranslateY.toFixed(2)}px)`;
-        momentsSection.style.pointerEvents = (oCarIn <= 0.02) ? "none" : "auto";
+        momentsSection.style.transform = `translateY(${carTranslateY.toFixed(
+          2
+        )}px)`;
+        momentsSection.style.pointerEvents = oCarIn <= 0.02 ? "none" : "auto";
       }
     }
 
     if (!prefersReduce) {
       applyCrossfade();
       let ticking = false;
-      window.addEventListener("scroll", () => {
-        if (ticking) return;
-        ticking = true;
-        requestAnimationFrame(() => { applyCrossfade(); ticking = false; });
-      }, { passive: true });
-      window.addEventListener("resize", () => { applyCrossfade(); }, { passive: true });
+      window.addEventListener(
+        "scroll",
+        () => {
+          if (ticking) return;
+          ticking = true;
+          requestAnimationFrame(() => {
+            applyCrossfade();
+            ticking = false;
+          });
+        },
+        { passive: true }
+      );
+      window.addEventListener(
+        "resize",
+        () => {
+          applyCrossfade();
+        },
+        { passive: true }
+      );
     }
 
     if (heroContent && momentsSection) {
-      const io = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting) {
-          heroContent.style.opacity = "0";
-          heroContent.style.pointerEvents = "none";
-          heroContent.style.transform = "translateY(-8px) scale(0.98)";
-        } else {
-          heroContent.style.pointerEvents = "auto";
-        }
-      }, { root: null, threshold: 0, rootMargin: "0px 0px -20% 0px" });
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            heroContent.style.opacity = "0";
+            heroContent.style.pointerEvents = "none";
+            heroContent.style.transform = "translateY(-8px) scale(0.98)";
+          } else {
+            heroContent.style.pointerEvents = "auto";
+          }
+        },
+        { root: null, threshold: 0, rootMargin: "0px 0px -20% 0px" }
+      );
       io.observe(momentsSection);
     }
   });
 })();
 
 /* ======================= CTA: Links + Tilt + Form ========================= */
-(function(){
-  const FORMS_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdHwvZzVsUZ9qWEYbftfQW_8ucOLlfw6KhX9eivGNVGpg5NMA/viewform?usp=header";
-  const MURAL_URL = document.querySelector(".btn-mural")?.getAttribute("href") || "mural.html";
+(function () {
+  const FORMS_URL =
+    "https://docs.google.com/forms/d/e/1FAIpQLSdHwvZzVsUZ9qWEYbftfQW_8ucOLlfw6KhX9eivGNVGpg5NMA/viewform?usp=header";
+  const MURAL_URL =
+    document.querySelector(".btn-mural")?.getAttribute("href") || "mural.html";
 
-  const formLink  = document.getElementById("cta-form-link");
+  const formLink = document.getElementById("cta-form-link");
   const muralLink = document.getElementById("cta-mural-link");
-  if (formLink)  formLink.href  = FORMS_URL;
+  if (formLink) formLink.href = FORMS_URL;
   if (muralLink) muralLink.href = MURAL_URL;
 
   const copyBtn = document.querySelector("[data-copy]");
   copyBtn?.addEventListener("click", async (e) => {
-    try { await navigator.clipboard.writeText(FORMS_URL); toast(e.currentTarget, "¡Enlace copiado!"); }
-    catch { toast(e.currentTarget, "No se pudo copiar"); }
+    try {
+      await navigator.clipboard.writeText(FORMS_URL);
+      toast(e.currentTarget, "¡Enlace copiado!");
+    } catch {
+      toast(e.currentTarget, "No se pudo copiar");
+    }
   });
 
   const canTilt = matchMedia("(pointer:fine)").matches;
-  if (canTilt){
-    document.querySelectorAll(".cta-card").forEach(card => {
+  if (canTilt) {
+    document.querySelectorAll(".cta-card").forEach((card) => {
       card.addEventListener("mousemove", (e) => {
         const r = card.getBoundingClientRect();
-        const x = e.clientX - r.left, y = e.clientY - r.top;
-        const px = (x / r.width) - .5;
-        const py = (y / r.height) - .5;
+        const x = e.clientX - r.left,
+          y = e.clientY - r.top;
+        const px = x / r.width - 0.5;
+        const py = y / r.height - 0.5;
         card.style.setProperty("--ry", `${px * 6}deg`);
         card.style.setProperty("--rx", `${-py * 6}deg`);
         card.style.setProperty("--mx", `${x}px`);
@@ -322,19 +397,19 @@ window.scrollToContent = scrollToContent;
     });
   }
 
-  function toast(btn, msg){
+  function toast(btn, msg) {
     const tip = document.createElement("span");
     tip.className = "toast";
     tip.textContent = msg;
     btn.style.position = "relative";
     btn.appendChild(tip);
-    setTimeout(()=> tip.remove(), 1400);
+    setTimeout(() => tip.remove(), 1400);
   }
 
   /* --------------------------- Envío del Form ---------------------------- */
   const form = document.getElementById("share-form");
-  const btn  = document.getElementById("btn-submit");
-  const out  = document.getElementById("form-feedback");
+  const btn = document.getElementById("btn-submit");
+  const out = document.getElementById("form-feedback");
   if (!form) return;
 
   // Decide endpoint y si se envía key (proxy seguro vs fallback directo)
@@ -348,26 +423,35 @@ window.scrollToContent = scrollToContent;
     const hasBuilder = typeof window.buildEndpointUrl === "function";
     const url = hasBuilder
       ? window.buildEndpointUrl("submit")
-      : `${((window.CONFIG && window.CONFIG.API_URL) || "/api").replace(/\/$/, "")}?p=submit`;
+      : `${((window.CONFIG && window.CONFIG.API_URL) || "/api").replace(
+          /\/$/,
+          ""
+        )}?p=submit`;
     return { url, sendKey: true };
   }
 
   form.addEventListener("submit", async (ev) => {
     ev.preventDefault();
-    if (out) { out.textContent = ""; out.classList.remove("ok","err"); }
+    if (out) {
+      out.textContent = "";
+      out.classList.remove("ok", "err");
+    }
 
     const hp = form.querySelector("input.hp");
     if (hp && hp.value) return; // bot
 
-    const nombre     = form.nombre?.value?.trim() || "";
-    const email      = form.email?.value?.trim() || "";
+    const nombre = form.nombre?.value?.trim() || "";
+    const email = form.email?.value?.trim() || "";
     const comentario = form.comentario?.value?.trim() || "";
-    const consentOK  = document.getElementById("f-consent")?.checked;
+    const consentOK = document.getElementById("f-consent")?.checked;
 
-    if (nombre.length < 2)       return showErr("Por favor, escribe tu nombre (mín. 2 caracteres).");
-    if (comentario.length < 5)   return showErr("El mensaje es muy corto (mín. 5 caracteres).");
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr("El correo no parece válido.");
-    if (!consentOK)              return showErr("Debes aceptar el tratamiento de datos.");
+    if (nombre.length < 2)
+      return showErr("Por favor, escribe tu nombre (mín. 2 caracteres).");
+    if (comentario.length < 5)
+      return showErr("El mensaje es muy corto (mín. 5 caracteres).");
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return showErr("El correo no parece válido.");
+    if (!consentOK) return showErr("Debes aceptar el tratamiento de datos.");
 
     const { url, sendKey } = resolveSubmitTarget();
 
@@ -381,25 +465,37 @@ window.scrollToContent = scrollToContent;
       const resp = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       // Intentar JSON; si falla, volcar texto para debug
-      let data = null, text = null;
+      let data = null,
+        text = null;
       const ctype = resp.headers.get("content-type") || "";
       if (/application\/json/i.test(ctype)) {
         data = await resp.json();
       } else {
         text = await resp.text();
-        if (window.DEBUG_MURAL) console.warn("Respuesta no-JSON:", resp.status, ctype, text?.slice(0,400));
+        if (window.DEBUG_MURAL)
+          console.warn(
+            "Respuesta no-JSON:",
+            resp.status,
+            ctype,
+            text?.slice(0, 400)
+          );
       }
 
       if (!resp.ok) {
-        const msg = (data && (data.error || data.message)) || text || "No se pudo enviar. Intenta de nuevo.";
+        const msg =
+          (data && (data.error || data.message)) ||
+          text ||
+          "No se pudo enviar. Intenta de nuevo.";
         throw new Error(msg);
       }
       if (data && (data.ok === false || data.success === false)) {
-        throw new Error(data.error || data.message || "No se pudo enviar. Intenta de nuevo.");
+        throw new Error(
+          data.error || data.message || "No se pudo enviar. Intenta de nuevo."
+        );
       }
 
       form.reset();
@@ -411,15 +507,23 @@ window.scrollToContent = scrollToContent;
     }
   });
 
-  function setLoading(loading){
+  function setLoading(loading) {
     if (!btn) return;
     btn.disabled = !!loading;
     btn.innerText = loading ? "Enviando…" : "Enviar mensaje";
   }
-  function showErr(msg){
-    if (out){ out.classList.remove("ok"); out.classList.add("err"); out.textContent = msg; }
+  function showErr(msg) {
+    if (out) {
+      out.classList.remove("ok");
+      out.classList.add("err");
+      out.textContent = msg;
+    }
   }
-  function showOk(msg){
-    if (out){ out.classList.remove("err"); out.classList.add("ok"); out.textContent = msg; }
+  function showOk(msg) {
+    if (out) {
+      out.classList.remove("err");
+      out.classList.add("ok");
+      out.textContent = msg;
+    }
   }
 })();

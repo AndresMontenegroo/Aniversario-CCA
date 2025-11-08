@@ -56,7 +56,7 @@ body{
 
 /* ========== 2) BACKGROUND ========== */
 .background-overlay{
-  position:fixed; inset:0; z-index:-1; background:#b1a74a;
+   position: fixed; inset: 0; z-index: -1; background: #b1a74a;
 }
 .background-overlay::before{
   content:""; position:absolute; inset:0;
@@ -76,8 +76,7 @@ body{
   padding: 0 60px;
   z-index: 1000;
   background: rgba(255, 255, 255); 
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+ 
   
 }
 .navbar::after {
