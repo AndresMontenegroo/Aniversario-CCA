@@ -462,7 +462,7 @@ window.scrollToContent = scrollToContent;
 
     setLoading(true);
     try {
-      const resp = await fetch(url, {
+      const resp = await fetch('https://cca35aniversario.cca.edu.co/api/mural.php', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

@@ -12,7 +12,7 @@
 
   // URL real de tu Apps Script (EXEC)
   const APPS_SCRIPT_EXEC =
-    'https://script.google.com/macros/s/AKfycbw5qvphWfLm4cvIlIVRFInpBUh6oOee2TkdixBn1rXn1V7_w6xuFmW-I1jDV14FWOLGVw/exec';
+    'https://script.google.com/macros/s/AKfycbzMqLNqMB0oPwflNIyovyi8llXjZ4G4xwic4e2WKiuJBbIOKjW2r9D4UIkRY5ntXOGfEw/exec';
 
   // Proxy recomendado según tu netlify.toml actual
   // (mapeado a GAS):  [[redirects]] from="/api/mural" -> to=".../exec"
