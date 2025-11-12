@@ -18,6 +18,27 @@
   --frame: clamp(10px, 2.5vw, 22px);    /* grosor del marco (más delgado) */
 }
 
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 1rem;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+  border-radius: 1rem;
+}
+
 /* Reset básico */
 html,body{height:100%; margin:0}
 body{
@@ -26,6 +47,7 @@ body{
   color:var(--ink);
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
+  overflow: hidden;
 }
 body.no-scroll{ overflow:hidden; }
 
@@ -247,13 +269,17 @@ body.no-scroll{ overflow:hidden; }
 .note--top{ z-index:55; }
 
 /* Contenido */
+.active .zoom-card .note__content p {
+  overflow:overlay; 
+  height: 100vh;
+}
 .note__content{
   position:relative; display:flex; flex-direction:column; gap:8px;
   height:100%; overflow:auto; padding-top:6px;
 }
 .note__content p{
   margin:0; line-height:1.22; overflow-wrap:anywhere;
-  display:-webkit-box; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis;
+  display:-webkit-box; -webkit-box-orient:vertical; text-overflow:ellipsis;
   line-clamp:var(--note-lines);
   -webkit-line-clamp:var(--note-lines);
   font-size: var(--note-fs);
